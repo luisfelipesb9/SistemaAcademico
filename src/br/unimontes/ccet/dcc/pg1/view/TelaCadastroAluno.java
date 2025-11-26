@@ -23,7 +23,6 @@ public class TelaCadastroAluno extends javax.swing.JFrame {
                 jbCadastrar.setText("Salvar Alterações");
         }
 
-        // @SuppressWarnings("unchecked")
         private void initComponents() {
 
                 panelPG11 = new br.unimontes.ccet.dcc.pg1.view.panels.PanelPG1();

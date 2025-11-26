@@ -56,7 +56,6 @@ public class TelaCadastroMatricula extends javax.swing.JFrame {
         }
     }
 
-    @SuppressWarnings("unchecked")
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();

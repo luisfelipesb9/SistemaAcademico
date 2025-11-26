@@ -39,6 +39,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
         jbAlunos = new javax.swing.JButton();
         jbCursos = new javax.swing.JButton();
         jbMatriculas = new javax.swing.JButton();
+        jbDashboard = new javax.swing.JButton();
         jbSair = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -106,6 +107,14 @@ public class TelaPrincipal extends javax.swing.JFrame {
             }
         });
 
+        jbDashboard.setFont(new java.awt.Font("Segoe UI", 0, 18));
+        jbDashboard.setText("Dashboard");
+        jbDashboard.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbDashboardActionPerformed(evt);
+            }
+        });
+
         jbSair.setText("Sair");
         jbSair.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -130,6 +139,8 @@ public class TelaPrincipal extends javax.swing.JFrame {
                                                 javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addComponent(jbMatriculas, javax.swing.GroupLayout.DEFAULT_SIZE,
                                                 javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jbDashboard, javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING,
                                                 jPanel1Layout.createSequentialGroup()
                                                         .addGap(0, 0, Short.MAX_VALUE)
@@ -151,6 +162,9 @@ public class TelaPrincipal extends javax.swing.JFrame {
                                         javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
                                 .addComponent(jbMatriculas, javax.swing.GroupLayout.PREFERRED_SIZE, 45,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jbDashboard, javax.swing.GroupLayout.PREFERRED_SIZE, 45,
                                         javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35,
                                         Short.MAX_VALUE)
@@ -204,6 +218,11 @@ public class TelaPrincipal extends javax.swing.JFrame {
         });
     }
 
+    private void jbDashboardActionPerformed(java.awt.event.ActionEvent evt) {
+        TelaDashboard tela = new TelaDashboard();
+        tela.setVisible(true);
+    }
+
     private void jbSairActionPerformed(java.awt.event.ActionEvent evt) {
         System.exit(0);
     }
@@ -243,6 +262,7 @@ public class TelaPrincipal extends javax.swing.JFrame {
     private javax.swing.JButton jbAlunos;
     private javax.swing.JButton jbCursos;
     private javax.swing.JButton jbMatriculas;
+    private javax.swing.JButton jbDashboard;
     private javax.swing.JButton jbSair;
     private javax.swing.JLabel lblTotalAlunos;
     private javax.swing.JLabel lblTotalCursos;

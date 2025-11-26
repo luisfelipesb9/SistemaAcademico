@@ -5,18 +5,16 @@ public class Utils {
         if (cpf == null || cpf.isBlank())
             return null;
 
-        // Remove non-digits
         String numCpf = cpf.replaceAll("[^0-9]", "");
 
         if (numCpf.length() != 11)
             return null;
 
-        // Check for repeated digits (e.g., 111.111.111-11)
         if (numCpf.matches("(\\d)\\1{10}"))
             return null;
 
         try {
-            // 1st Check Digit
+
             int soma1 = 0;
             for (int i = 0; i < 9; i++) {
                 int num = Character.getNumericValue(numCpf.charAt(i));
@@ -30,7 +28,6 @@ public class Utils {
             if (resto1 != Character.getNumericValue(numCpf.charAt(9)))
                 return null;
 
-            // 2nd Check Digit
             int soma2 = 0;
             for (int i = 0; i < 10; i++) {
                 int num = Character.getNumericValue(numCpf.charAt(i));
@@ -44,7 +41,7 @@ public class Utils {
             if (resto2 != Character.getNumericValue(numCpf.charAt(10)))
                 return null;
 
-            return cpf; // Return original if valid
+            return cpf;
         } catch (Exception e) {
             return null;
         }
@@ -59,7 +56,7 @@ public class Utils {
     }
 
     public static Integer validaAnoNascimento(int ano) {
-        // Check if it has 4 digits (1000 to 9999)
+
         if (String.valueOf(ano).length() != 4)
             return null;
 

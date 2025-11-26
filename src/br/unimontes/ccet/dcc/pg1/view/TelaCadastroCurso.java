@@ -12,7 +12,6 @@ public class TelaCadastroCurso extends javax.swing.JFrame {
                 setLocationRelativeTo(null);
         }
 
-        // @SuppressWarnings("unchecked")
         private void initComponents() {
 
                 panelPG11 = new br.unimontes.ccet.dcc.pg1.view.panels.PanelPG1();

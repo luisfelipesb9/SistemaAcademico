@@ -108,4 +108,4 @@ Para rodar o projeto em sua máquina, siga os passos abaixo:
 Este sistema atende a todos os requisitos propostos, demonstrando uma aplicação robusta de conceitos de Orientação a Objetos, persistência de dados e interface gráfica. O código está limpo, organizado e documentado, pronto para manutenção e expansão futura.
 
 **Desenvolvido por:** Luis
-**Disciplina:** Programação 1
+**Disciplina:** Programação 1 
