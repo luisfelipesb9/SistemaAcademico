@@ -115,7 +115,7 @@ public class TelaLogin extends javax.swing.JFrame {
         String usuario = tfUsuario.getText();
         String senha = new String(pfSenha.getPassword());
 
-        if (usuario.equals("admin") && senha.equals("1234")) {
+        if (usuario.equals("admin") && senha.equals("123")) {
             TelaPrincipal principal = new TelaPrincipal();
             principal.setVisible(true);
             this.dispose();
