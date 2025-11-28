@@ -231,6 +231,9 @@ public class TelaPrincipal extends javax.swing.JFrame {
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.put("nimbusBase", new java.awt.Color(51, 102, 255));
+                    javax.swing.UIManager.put("nimbusBlueGrey", new java.awt.Color(190, 210, 240));
+                    javax.swing.UIManager.put("control", new java.awt.Color(240, 245, 255));
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
                     break;
                 }

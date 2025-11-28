@@ -32,9 +32,9 @@ public class TelaGerenciarMatriculas extends javax.swing.JFrame {
 
             for (Matricula m : matriculas) {
                 br.unimontes.ccet.dcc.pg1.model.dao.entity.Aluno a = new br.unimontes.ccet.dcc.pg1.model.dao.entity.Aluno(
-                        m.getCpfAluno(), "Dummy", 2000);
+                        m.getIdAluno(), "000.000.000-00", "Dummy", 2000, 0);
                 a = aDao.findOne(a);
-                String nomeAluno = (a != null) ? a.getNome() : "CPF: " + m.getCpfAluno();
+                String nomeAluno = (a != null) ? a.getNome() : "ID: " + m.getIdAluno();
 
                 br.unimontes.ccet.dcc.pg1.model.dao.entity.Turma t = new br.unimontes.ccet.dcc.pg1.model.dao.entity.Turma();
                 t.setId(m.getIdTurma());
@@ -237,7 +237,34 @@ public class TelaGerenciarMatriculas extends javax.swing.JFrame {
     }
 
     private void jbEditarActionPerformed(java.awt.event.ActionEvent evt) {
-        JOptionPane.showMessageDialog(this, "Para editar, exclua e cadastre novamente.");
+        int row = tableMatriculas.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione uma matrícula para lançar notas.");
+            return;
+        }
+
+        try {
+            int id = (int) tableMatriculas.getValueAt(row, 0);
+            MatriculaDao dao = new MatriculaDao();
+            Matricula m = new Matricula();
+            m.setId(id);
+            m = dao.findOne(m);
+
+            if (m != null) {
+                String nomeAluno = (String) tableMatriculas.getValueAt(row, 1);
+                String nomeDisciplina = (String) tableMatriculas.getValueAt(row, 2);
+
+                TelaLancarNotas tela = new TelaLancarNotas(this, true);
+                tela.setMatricula(m, nomeAluno, nomeDisciplina);
+                tela.setVisible(true);
+
+                if (tela.isSalvo()) {
+                    listarMatriculas();
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao abrir lançamento de notas: " + e.getMessage());
+        }
     }
 
     private void jbExcluirActionPerformed(java.awt.event.ActionEvent evt) {

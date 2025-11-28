@@ -16,24 +16,23 @@ public class AlunoDao implements Dao<Aluno> {
     public int save(Aluno entidade) throws DAOException {
         int linhasGravadas = 0;
         try {
-            String cpf = entidade.getCpf() != null ? entidade.getCpf().trim() : "";
+            // Gera um RA aleatório (simulação)
+            int novoId = 2024000 + new java.util.Random().nextInt(1000);
+            entidade.setId(novoId);
 
-            Aluno searchObj = new Aluno(cpf, "", 0);
-
-            if (findOne(searchObj) != null) {
-                return update(entidade);
-            }
-
-            String iQuery = "INSERT INTO alunos (cpf, nome, ano_nascimento) VALUES (?,?,?)";
+            String iQuery = "INSERT INTO alunos (id, cpf, nome, ano_nascimento, id_curso) VALUES (?,?,?,?,?)";
             PreparedStatement st = conexao.prepareStatement(iQuery);
-            st.setString(1, cpf);
-            st.setString(2, entidade.getNome());
-            st.setInt(3, entidade.getAnoNascimento());
+            st.setInt(1, entidade.getId());
+            st.setString(2, entidade.getCpf());
+            st.setString(3, entidade.getNome());
+            st.setInt(4, entidade.getAnoNascimento());
+            st.setInt(5, entidade.getIdCurso());
+
             linhasGravadas = st.executeUpdate();
 
         } catch (SQLException ex) {
             if (ex.getErrorCode() == 1062 || ex.getMessage().contains("Duplicate entry")) {
-                return update(entidade);
+                throw new DAOException("Erro: Já existe um aluno com este ID ou CPF.");
             }
             throw new DAOException("Erro ao salvar Aluno: " + ex.getMessage());
         }
@@ -44,13 +43,13 @@ public class AlunoDao implements Dao<Aluno> {
     public int update(Aluno entidade) throws DAOException {
         int linhasAfetadas = 0;
         try {
-            String uQuery = "UPDATE alunos SET nome = ?, ano_nascimento = ? WHERE cpf = ?";
+            String uQuery = "UPDATE alunos SET nome = ?, ano_nascimento = ?, id_curso = ?, cpf = ? WHERE id = ?";
             PreparedStatement st = conexao.prepareStatement(uQuery);
             st.setString(1, entidade.getNome());
             st.setInt(2, entidade.getAnoNascimento());
-
-            String cpf = entidade.getCpf() != null ? entidade.getCpf().trim() : "";
-            st.setString(3, cpf);
+            st.setInt(3, entidade.getIdCurso());
+            st.setString(4, entidade.getCpf());
+            st.setInt(5, entidade.getId());
 
             linhasAfetadas = st.executeUpdate();
 
@@ -64,9 +63,9 @@ public class AlunoDao implements Dao<Aluno> {
     public int delete(Aluno entidade) throws DAOException {
         int linhasAfetadas = 0;
         try {
-            String dQuery = "DELETE FROM alunos WHERE cpf = ?";
+            String dQuery = "DELETE FROM alunos WHERE id = ?";
             PreparedStatement st = conexao.prepareStatement(dQuery);
-            st.setString(1, entidade.getCpf());
+            st.setInt(1, entidade.getId());
             linhasAfetadas = st.executeUpdate();
         } catch (SQLException ex) {
             throw new DAOException("Erro ao deletar Aluno: " + ex.getMessage());
@@ -82,7 +81,8 @@ public class AlunoDao implements Dao<Aluno> {
             PreparedStatement st = conexao.prepareStatement(sQuery);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                alunos.add(new Aluno(rs.getString("cpf"), rs.getString("nome"), rs.getInt("ano_nascimento")));
+                alunos.add(new Aluno(rs.getInt("id"), rs.getString("cpf"), rs.getString("nome"),
+                        rs.getInt("ano_nascimento"), rs.getInt("id_curso")));
             }
         } catch (SQLException ex) {
             throw new DAOException("Erro ao buscar todos os alunos: " + ex.getMessage());
@@ -94,13 +94,13 @@ public class AlunoDao implements Dao<Aluno> {
     public Aluno findOne(Aluno entidade) throws DAOException {
         Aluno aluno = null;
         try {
-            String sQuery = "SELECT * FROM alunos WHERE cpf = ?";
+            String sQuery = "SELECT * FROM alunos WHERE id = ?";
             PreparedStatement st = conexao.prepareStatement(sQuery);
-            String cpf = entidade.getCpf() != null ? entidade.getCpf().trim() : "";
-            st.setString(1, cpf);
+            st.setInt(1, entidade.getId());
             ResultSet rs = st.executeQuery();
             if (rs.next()) {
-                aluno = new Aluno(rs.getString("cpf"), rs.getString("nome"), rs.getInt("ano_nascimento"));
+                aluno = new Aluno(rs.getInt("id"), rs.getString("cpf"), rs.getString("nome"),
+                        rs.getInt("ano_nascimento"), rs.getInt("id_curso"));
             }
         } catch (SQLException ex) {
             throw new DAOException("Erro ao buscar aluno: " + ex.getMessage());

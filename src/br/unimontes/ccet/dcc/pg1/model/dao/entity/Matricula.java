@@ -2,7 +2,7 @@ package br.unimontes.ccet.dcc.pg1.model.dao.entity;
 
 public class Matricula {
     private int id;
-    private String cpfAluno;
+    private int idAluno; // Alterado de CPF para ID do Aluno
     private int idTurma;
     private double nota;
     private int frequencia;
@@ -10,16 +10,16 @@ public class Matricula {
     public Matricula() {
     }
 
-    public Matricula(int id, String cpfAluno, int idTurma, double nota, int frequencia) {
+    public Matricula(int id, int idAluno, int idTurma, double nota, int frequencia) {
         this.id = id;
-        this.cpfAluno = cpfAluno;
+        this.idAluno = idAluno;
         this.idTurma = idTurma;
         this.nota = nota;
         this.frequencia = frequencia;
     }
 
-    public Matricula(String cpfAluno, int idTurma) {
-        this.cpfAluno = cpfAluno;
+    public Matricula(int idAluno, int idTurma) {
+        this.idAluno = idAluno;
         this.idTurma = idTurma;
         this.nota = 0.0;
         this.frequencia = 0;
@@ -33,12 +33,12 @@ public class Matricula {
         this.id = id;
     }
 
-    public String getCpfAluno() {
-        return cpfAluno;
+    public int getIdAluno() {
+        return idAluno;
     }
 
-    public void setCpfAluno(String cpfAluno) {
-        this.cpfAluno = cpfAluno;
+    public void setIdAluno(int idAluno) {
+        this.idAluno = idAluno;
     }
 
     public int getIdTurma() {

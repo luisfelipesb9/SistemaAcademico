@@ -194,7 +194,7 @@ public class TelaCadastroMatricula extends javax.swing.JFrame {
             double nota = Double.parseDouble(tfNota.getText());
             int frequencia = Integer.parseInt(tfFrequencia.getText());
 
-            Matricula m = new Matricula(aluno.getCpf(), idTurma);
+            Matricula m = new Matricula(aluno.getId(), idTurma);
             m.setNota(nota);
             m.setFrequencia(frequencia);
 

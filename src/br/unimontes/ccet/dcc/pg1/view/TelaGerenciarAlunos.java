@@ -9,6 +9,7 @@ import javax.swing.table.DefaultTableModel;
 public class TelaGerenciarAlunos extends javax.swing.JFrame {
 
     public TelaGerenciarAlunos() {
+        // Force recompile
         initComponents();
         setLocationRelativeTo(null);
         listarAlunos();
@@ -25,20 +26,35 @@ public class TelaGerenciarAlunos extends javax.swing.JFrame {
             DefaultTableModel model = (DefaultTableModel) tableAlunos.getModel();
             model.setNumRows(0);
 
+            // Para mostrar o nome do curso, precisaria do CursoDao ou fazer join no
+            // AlunoDao.
+            // Por simplicidade, vou mostrar o ID do curso ou buscar o nome.
+            // Melhor: Buscar o nome do curso.
+            br.unimontes.ccet.dcc.pg1.model.dao.CursoDao cursoDao = new br.unimontes.ccet.dcc.pg1.model.dao.CursoDao();
+            List<br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso> cursos = cursoDao.findAll();
+
             for (Aluno a : alunos) {
                 if (nomePesquisa != null && !nomePesquisa.isBlank()) {
                     String termo = nomePesquisa.toLowerCase();
                     boolean matches = a.getNome().toLowerCase().contains(termo) ||
-                            a.getCpf().contains(termo) ||
-                            String.valueOf(a.getAnoNascimento()).contains(termo);
+                            String.valueOf(a.getId()).contains(termo);
                     if (!matches) {
                         continue;
                     }
                 }
+
+                String nomeCurso = "N/A";
+                for (br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso c : cursos) {
+                    if (c.getId() == a.getIdCurso()) {
+                        nomeCurso = c.getNome();
+                        break;
+                    }
+                }
+
                 model.addRow(new Object[] {
-                        a.getCpf(),
+                        a.getId(),
                         a.getNome(),
-                        a.getAnoNascimento()
+                        nomeCurso
                 });
             }
         } catch (Exception e) {
@@ -58,6 +74,7 @@ public class TelaGerenciarAlunos extends javax.swing.JFrame {
         jbCadastrar = new javax.swing.JButton();
         jbEditar = new javax.swing.JButton();
         jbExcluir = new javax.swing.JButton();
+        jbBoletim = new javax.swing.JButton();
         jbVoltar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -78,7 +95,7 @@ public class TelaGerenciarAlunos extends javax.swing.JFrame {
 
                 },
                 new String[] {
-                        "CPF", "Nome", "Ano Nascimento"
+                        "Matrícula", "Nome", "Curso"
                 }) {
             boolean[] canEdit = new boolean[] {
                     false, false, false
@@ -118,6 +135,13 @@ public class TelaGerenciarAlunos extends javax.swing.JFrame {
             }
         });
 
+        jbBoletim.setText("Boletim");
+        jbBoletim.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbBoletimActionPerformed(evt);
+            }
+        });
+
         jbVoltar.setText("Voltar");
         jbVoltar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -151,6 +175,8 @@ public class TelaGerenciarAlunos extends javax.swing.JFrame {
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(jbExcluir)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jbBoletim)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(jbVoltar)))
                                 .addContainerGap()));
         jPanel1Layout.setVerticalGroup(
@@ -173,6 +199,7 @@ public class TelaGerenciarAlunos extends javax.swing.JFrame {
                                         .addComponent(jbCadastrar)
                                         .addComponent(jbEditar)
                                         .addComponent(jbExcluir)
+                                        .addComponent(jbBoletim)
                                         .addComponent(jbVoltar))
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 
@@ -218,9 +245,9 @@ public class TelaGerenciarAlunos extends javax.swing.JFrame {
         }
 
         try {
-            String cpf = (String) tableAlunos.getValueAt(row, 0);
+            int id = (int) tableAlunos.getValueAt(row, 0);
             AlunoDao dao = new AlunoDao();
-            Aluno a = new Aluno(cpf, "Dummy Name", 2000);
+            Aluno a = new Aluno(id, "000.000.000-00", "Dummy", 2000, 0); // Dummy para busca
             a = dao.findOne(a);
 
             if (a != null) {
@@ -249,14 +276,15 @@ public class TelaGerenciarAlunos extends javax.swing.JFrame {
             return;
         }
 
-        String cpf = (String) tableAlunos.getValueAt(row, 0);
-        int confirm = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja excluir o aluno com CPF " + cpf + "?",
+        int id = (int) tableAlunos.getValueAt(row, 0);
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Tem certeza que deseja excluir o aluno com Matrícula " + id + "?",
                 "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 AlunoDao dao = new AlunoDao();
-                Aluno a = new Aluno(cpf, "Dummy", 2000);
+                Aluno a = new Aluno(id, "000.000.000-00", "Dummy", 2000, 0);
                 dao.delete(a);
                 listarAlunos();
                 JOptionPane.showMessageDialog(this, "Aluno excluído com sucesso!");
@@ -271,12 +299,27 @@ public class TelaGerenciarAlunos extends javax.swing.JFrame {
         }
     }
 
+    private void jbBoletimActionPerformed(java.awt.event.ActionEvent evt) {
+        int row = tableAlunos.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um aluno para ver o boletim.");
+            return;
+        }
+
+        int id = (int) tableAlunos.getValueAt(row, 0);
+        String nome = (String) tableAlunos.getValueAt(row, 1);
+
+        TelaBoletim tela = new TelaBoletim(String.valueOf(id), nome);
+        tela.setVisible(true);
+    }
+
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JButton jbCadastrar;
     private javax.swing.JButton jbEditar;
     private javax.swing.JButton jbExcluir;
+    private javax.swing.JButton jbBoletim;
     private javax.swing.JButton jbVoltar;
     private javax.swing.JButton jbListar;
     private javax.swing.JButton jbPesquisar;

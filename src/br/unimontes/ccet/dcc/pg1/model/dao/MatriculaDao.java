@@ -17,16 +17,13 @@ public class MatriculaDao implements Dao<Matricula> {
     public int save(Matricula entidade) throws DAOException {
         int linhasGravadas = 0;
         try {
-            int id = 100000000 + new java.util.Random().nextInt(100000);
-            entidade.setId(id);
-
-            String iQuery = "INSERT INTO matriculas (id, cpf_aluno, id_turma, nota, frequencia) VALUES (?,?,?,?,?)";
+            // Tabela renomeada para matriculas_disciplinas
+            String iQuery = "INSERT INTO matriculas_disciplinas (id_aluno, id_turma, nota, frequencia) VALUES (?,?,?,?)";
             PreparedStatement st = conexao.prepareStatement(iQuery, Statement.RETURN_GENERATED_KEYS);
-            st.setInt(1, id);
-            st.setString(2, entidade.getCpfAluno());
-            st.setInt(3, entidade.getIdTurma());
-            st.setDouble(4, entidade.getNota());
-            st.setInt(5, entidade.getFrequencia());
+            st.setInt(1, entidade.getIdAluno());
+            st.setInt(2, entidade.getIdTurma());
+            st.setDouble(3, entidade.getNota());
+            st.setInt(4, entidade.getFrequencia());
             linhasGravadas = st.executeUpdate();
         } catch (SQLException ex) {
             throw new DAOException("Erro ao salvar Matricula: " + ex.getMessage());
@@ -38,7 +35,7 @@ public class MatriculaDao implements Dao<Matricula> {
     public int update(Matricula entidade) throws DAOException {
         int linhasAfetadas = 0;
         try {
-            String uQuery = "UPDATE matriculas SET nota = ?, frequencia = ? WHERE id = ?";
+            String uQuery = "UPDATE matriculas_disciplinas SET nota = ?, frequencia = ? WHERE id = ?";
             PreparedStatement st = conexao.prepareStatement(uQuery);
             st.setDouble(1, entidade.getNota());
             st.setInt(2, entidade.getFrequencia());
@@ -54,7 +51,7 @@ public class MatriculaDao implements Dao<Matricula> {
     public int delete(Matricula entidade) throws DAOException {
         int linhasAfetadas = 0;
         try {
-            String dQuery = "DELETE FROM matriculas WHERE id = ?";
+            String dQuery = "DELETE FROM matriculas_disciplinas WHERE id = ?";
             PreparedStatement st = conexao.prepareStatement(dQuery);
             st.setInt(1, entidade.getId());
             linhasAfetadas = st.executeUpdate();
@@ -68,11 +65,11 @@ public class MatriculaDao implements Dao<Matricula> {
     public List<Matricula> findAll() throws DAOException {
         List<Matricula> matriculas = new ArrayList<>();
         try {
-            String sQuery = "SELECT * FROM matriculas";
+            String sQuery = "SELECT * FROM matriculas_disciplinas";
             PreparedStatement st = conexao.prepareStatement(sQuery);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                matriculas.add(new Matricula(rs.getInt("id"), rs.getString("cpf_aluno"), rs.getInt("id_turma"),
+                matriculas.add(new Matricula(rs.getInt("id"), rs.getInt("id_aluno"), rs.getInt("id_turma"),
                         rs.getDouble("nota"), rs.getInt("frequencia")));
             }
         } catch (SQLException ex) {
@@ -85,12 +82,12 @@ public class MatriculaDao implements Dao<Matricula> {
     public Matricula findOne(Matricula entidade) throws DAOException {
         Matricula matricula = null;
         try {
-            String sQuery = "SELECT * FROM matriculas WHERE id = ?";
+            String sQuery = "SELECT * FROM matriculas_disciplinas WHERE id = ?";
             PreparedStatement st = conexao.prepareStatement(sQuery);
             st.setInt(1, entidade.getId());
             ResultSet rs = st.executeQuery();
             if (rs.next()) {
-                matricula = new Matricula(rs.getInt("id"), rs.getString("cpf_aluno"), rs.getInt("id_turma"),
+                matricula = new Matricula(rs.getInt("id"), rs.getInt("id_aluno"), rs.getInt("id_turma"),
                         rs.getDouble("nota"), rs.getInt("frequencia"));
             }
         } catch (SQLException ex) {
@@ -100,7 +97,7 @@ public class MatriculaDao implements Dao<Matricula> {
     }
 
     public int count() throws SQLException {
-        String query = "SELECT COUNT(*) FROM matriculas";
+        String query = "SELECT COUNT(*) FROM matriculas_disciplinas";
         PreparedStatement st = conexao.prepareStatement(query);
         ResultSet rs = st.executeQuery();
         if (rs.next()) {
