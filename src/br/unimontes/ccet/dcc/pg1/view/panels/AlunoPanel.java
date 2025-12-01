@@ -1,0 +1,271 @@
+package br.unimontes.ccet.dcc.pg1.view.panels;
+
+import br.unimontes.ccet.dcc.pg1.controller.AlunoController;
+import br.unimontes.ccet.dcc.pg1.controller.CursoController;
+import br.unimontes.ccet.dcc.pg1.model.dao.entity.Aluno;
+import br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso;
+import br.unimontes.ccet.dcc.pg1.view.TelaCadastroAluno;
+import java.util.List;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
+
+public class AlunoPanel extends javax.swing.JPanel {
+
+    private AlunoController alunoController;
+    private CursoController cursoController;
+
+    public AlunoPanel() {
+        alunoController = new AlunoController();
+        cursoController = new CursoController();
+        initComponents();
+        listarAlunos();
+    }
+
+    private void listarAlunos() {
+        listarAlunos(null);
+    }
+
+    private void listarAlunos(String nomePesquisa) {
+        try {
+            List<Aluno> alunos = alunoController.listarTodos();
+            List<Curso> cursos = cursoController.listarTodos();
+
+            DefaultTableModel model = (DefaultTableModel) tableAlunos.getModel();
+            model.setNumRows(0);
+
+            for (Aluno a : alunos) {
+                if (nomePesquisa != null && !nomePesquisa.isBlank()) {
+                    String termo = nomePesquisa.toLowerCase();
+                    boolean matches = a.getNome().toLowerCase().contains(termo) ||
+                            String.valueOf(a.getId()).contains(termo);
+                    if (!matches) {
+                        continue;
+                    }
+                }
+
+                String nomeCurso = "N/A";
+                for (Curso c : cursos) {
+                    if (c.getId() == a.getIdCurso()) {
+                        nomeCurso = c.getNome();
+                        break;
+                    }
+                }
+
+                model.addRow(new Object[] {
+                        a.getId(),
+                        a.getNome(),
+                        nomeCurso
+                });
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao listar alunos: " + e.getMessage());
+        }
+    }
+
+    private void initComponents() {
+
+        jLabel1 = new javax.swing.JLabel();
+        tfPesquisa = new javax.swing.JTextField();
+        jbPesquisar = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tableAlunos = new javax.swing.JTable();
+        jbListar = new javax.swing.JButton();
+        jbCadastrar = new javax.swing.JButton();
+        jbEditar = new javax.swing.JButton();
+        jbExcluir = new javax.swing.JButton();
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18));
+        jLabel1.setText("Gerenciar Alunos");
+
+        jbPesquisar.setText("Pesquisar");
+        jbPesquisar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbPesquisarActionPerformed(evt);
+            }
+        });
+
+        tableAlunos.setModel(new javax.swing.table.DefaultTableModel(
+                new Object[][] {},
+                new String[] { "Matrícula", "Nome", "Curso" }) {
+            boolean[] canEdit = new boolean[] { false, false, false };
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit[columnIndex];
+            }
+        });
+        tableAlunos.setAutoCreateRowSorter(true);
+        jScrollPane1.setViewportView(tableAlunos);
+
+        jbListar.setText("Listar Todos");
+        jbListar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbListarActionPerformed(evt);
+            }
+        });
+
+        jbCadastrar.setText("Cadastrar");
+        jbCadastrar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbCadastrarActionPerformed(evt);
+            }
+        });
+
+        jbEditar.setText("Editar");
+        jbEditar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbEditarActionPerformed(evt);
+            }
+        });
+
+        jbExcluir.setText("Excluir");
+        jbExcluir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbExcluirActionPerformed(evt);
+            }
+        });
+
+        jbVoltar = new javax.swing.JButton();
+        jbVoltar.setText("Voltar");
+        jbVoltar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                java.awt.Window w = javax.swing.SwingUtilities.getWindowAncestor(AlunoPanel.this);
+                if (w != null)
+                    w.dispose();
+            }
+        });
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
+        this.setLayout(layout);
+        layout.setHorizontalGroup(
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 588,
+                                                Short.MAX_VALUE)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jLabel1)
+                                                .addGap(0, 0, Short.MAX_VALUE))
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(tfPesquisa)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jbPesquisar))
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addComponent(jbListar)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                                        javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                .addComponent(jbCadastrar)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jbEditar)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jbExcluir)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jbVoltar)))
+                                .addContainerGap()));
+        layout.setVerticalGroup(
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(tfPesquisa, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jbPesquisar))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(jbListar)
+                                        .addComponent(jbCadastrar)
+                                        .addComponent(jbEditar)
+                                        .addComponent(jbExcluir)
+                                        .addComponent(jbVoltar))
+                                .addContainerGap()));
+    }
+
+    private void jbPesquisarActionPerformed(java.awt.event.ActionEvent evt) {
+        listarAlunos(tfPesquisa.getText());
+    }
+
+    private void jbListarActionPerformed(java.awt.event.ActionEvent evt) {
+        listarAlunos();
+    }
+
+    private void jbCadastrarActionPerformed(java.awt.event.ActionEvent evt) {
+        TelaCadastroAluno tela = new TelaCadastroAluno();
+        tela.setVisible(true);
+        tela.setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
+        tela.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                listarAlunos();
+            }
+        });
+    }
+
+    private void jbEditarActionPerformed(java.awt.event.ActionEvent evt) {
+        int row = tableAlunos.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um aluno para editar.");
+            return;
+        }
+
+        try {
+            int id = (int) tableAlunos.getValueAt(row, 0);
+            Aluno a = alunoController.buscarPorId(id);
+
+            if (a != null) {
+                TelaCadastroAluno tela = new TelaCadastroAluno();
+                tela.setAluno(a);
+                tela.setVisible(true);
+                tela.setDefaultCloseOperation(javax.swing.JFrame.DISPOSE_ON_CLOSE);
+                tela.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+                        listarAlunos();
+                    }
+                });
+            } else {
+                JOptionPane.showMessageDialog(this, "Aluno não encontrado.");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Erro ao carregar aluno para edição: " + e.getMessage());
+        }
+    }
+
+    private void jbExcluirActionPerformed(java.awt.event.ActionEvent evt) {
+        int row = tableAlunos.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um aluno para excluir.");
+            return;
+        }
+
+        int id = (int) tableAlunos.getValueAt(row, 0);
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Tem certeza que deseja excluir o aluno com Matrícula " + id + "?",
+                "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
+
+        if (confirm == JOptionPane.YES_OPTION) {
+            if (alunoController.excluir(id)) {
+                listarAlunos();
+                JOptionPane.showMessageDialog(this, "Aluno excluído com sucesso!");
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Erro ao excluir aluno. Verifique se existem matrículas associadas.");
+            }
+        }
+    }
+
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JButton jbCadastrar;
+    private javax.swing.JButton jbEditar;
+    private javax.swing.JButton jbExcluir;
+    private javax.swing.JButton jbListar;
+    private javax.swing.JButton jbPesquisar;
+    private javax.swing.JButton jbVoltar;
+    private javax.swing.JTable tableAlunos;
+    private javax.swing.JTextField tfPesquisa;
+}

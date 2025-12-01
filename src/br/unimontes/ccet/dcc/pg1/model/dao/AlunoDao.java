@@ -16,8 +16,11 @@ public class AlunoDao implements Dao<Aluno> {
     public int save(Aluno entidade) throws DAOException {
         int linhasGravadas = 0;
         try {
-            // Gera um RA aleatório (simulação)
-            int novoId = 2024000 + new java.util.Random().nextInt(1000);
+            // Gera um RA seguindo a lógica: 1000 + 5 números aleatórios (ex: 100012345)
+            String prefix = "1000";
+            int randomPart = new java.util.Random().nextInt(100000); // 0 to 99999
+            String idStr = prefix + String.format("%05d", randomPart);
+            int novoId = Integer.parseInt(idStr);
             entidade.setId(novoId);
 
             String iQuery = "INSERT INTO alunos (id, cpf, nome, ano_nascimento, id_curso) VALUES (?,?,?,?,?)";

@@ -1,8 +1,5 @@
 package br.unimontes.ccet.dcc.pg1.view;
 
-import br.unimontes.ccet.dcc.pg1.model.dao.AlunoDao;
-import br.unimontes.ccet.dcc.pg1.model.dao.CursoDao;
-import br.unimontes.ccet.dcc.pg1.model.dao.MatriculaDao;
 import javax.swing.JOptionPane;
 
 public class TelaPrincipal extends javax.swing.JFrame {
@@ -15,16 +12,17 @@ public class TelaPrincipal extends javax.swing.JFrame {
 
     public void refreshDashboard() {
         try {
-            AlunoDao aDao = new AlunoDao();
-            CursoDao cDao = new CursoDao();
-            MatriculaDao mDao = new MatriculaDao();
+            br.unimontes.ccet.dcc.pg1.controller.DashboardController controller = new br.unimontes.ccet.dcc.pg1.controller.DashboardController();
+            java.util.Map<String, Integer> dados = controller.getDadosDashboard();
 
-            lblTotalAlunos.setText("Total Alunos: " + aDao.count());
-            lblTotalCursos.setText("Cursos Ativos: " + cDao.count());
-            lblTotalMatriculas.setText("Matrículas: " + mDao.count());
+            lblTotalAlunos.setText("Total Alunos: " + dados.get("alunos"));
+            lblTotalCursos.setText("Cursos Ativos: " + dados.get("cursos"));
+            lblTotalMatriculas.setText("Matrículas: " + dados.get("matriculas"));
 
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Erro ao atualizar dashboard: " + e.getMessage());
+            // Silently fail or log if needed, but don't popup on every refresh if DB is
+            // empty/initing
+            System.err.println("Erro ao atualizar dashboard: " + e.getMessage());
         }
     }
 

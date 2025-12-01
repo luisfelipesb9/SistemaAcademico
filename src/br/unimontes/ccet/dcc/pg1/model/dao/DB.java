@@ -8,6 +8,11 @@ public class DB {
     private static DB instancia;
 
     private DB() throws SQLException {
+        try {
+            Class.forName("org.mariadb.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
         db = DriverManager.getConnection(url, "root", "");
     }
 
@@ -18,6 +23,13 @@ public class DB {
     }
 
     public Connection getConnection() {
+        try {
+            if (db == null || db.isClosed()) {
+                db = DriverManager.getConnection(url, "root", "");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return db;
     }
 }
