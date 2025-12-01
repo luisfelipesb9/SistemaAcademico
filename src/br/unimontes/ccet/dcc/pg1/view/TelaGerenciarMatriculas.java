@@ -11,6 +11,11 @@ public class TelaGerenciarMatriculas extends javax.swing.JFrame {
     public TelaGerenciarMatriculas() {
         initComponents();
         setLocationRelativeTo(null);
+        // Ocultar a coluna ID (index 0)
+        tableMatriculas.getColumnModel().getColumn(0).setMinWidth(0);
+        tableMatriculas.getColumnModel().getColumn(0).setMaxWidth(0);
+        tableMatriculas.getColumnModel().getColumn(0).setWidth(0);
+        tableMatriculas.setAutoCreateRowSorter(true);
         listarMatriculas();
     }
 
@@ -27,6 +32,8 @@ public class TelaGerenciarMatriculas extends javax.swing.JFrame {
             br.unimontes.ccet.dcc.pg1.model.dao.TurmaDao tDao = new br.unimontes.ccet.dcc.pg1.model.dao.TurmaDao();
             br.unimontes.ccet.dcc.pg1.model.dao.DisciplinaDao dDao = new br.unimontes.ccet.dcc.pg1.model.dao.DisciplinaDao();
 
+            br.unimontes.ccet.dcc.pg1.model.dao.CursoDao cDao = new br.unimontes.ccet.dcc.pg1.model.dao.CursoDao();
+
             DefaultTableModel model = (DefaultTableModel) tableMatriculas.getModel();
             model.setNumRows(0);
 
@@ -35,6 +42,17 @@ public class TelaGerenciarMatriculas extends javax.swing.JFrame {
                         m.getIdAluno(), "000.000.000-00", "Dummy", 2000, 0);
                 a = aDao.findOne(a);
                 String nomeAluno = (a != null) ? a.getNome() : "ID: " + m.getIdAluno();
+
+                String nomeCurso = "";
+                if (a != null) {
+                    br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso c = new br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso(
+                            "", 0);
+                    c.setId(a.getIdCurso());
+                    c = cDao.findOne(c);
+                    if (c != null) {
+                        nomeCurso = c.getNome();
+                    }
+                }
 
                 br.unimontes.ccet.dcc.pg1.model.dao.entity.Turma t = new br.unimontes.ccet.dcc.pg1.model.dao.entity.Turma();
                 t.setId(m.getIdTurma());
@@ -54,13 +72,15 @@ public class TelaGerenciarMatriculas extends javax.swing.JFrame {
                     String termo = nomePesquisa.toLowerCase();
                     boolean matches = nomeAluno.toLowerCase().contains(termo) ||
                             nomeDisciplina.toLowerCase().contains(termo) ||
-                            String.valueOf(m.getId()).contains(termo);
+                            String.valueOf(m.getIdAluno()).contains(termo) || // Busca pela Matrícula do Aluno
+                            nomeCurso.toLowerCase().contains(termo); // Busca pelo nome do Curso
                     if (!matches)
                         continue;
                 }
 
                 model.addRow(new Object[] {
-                        m.getId(),
+                        m.getId(), // ID da Matrícula (Oculto)
+                        m.getIdAluno(), // Matrícula do Aluno (RA)
                         nomeAluno,
                         nomeDisciplina,
                         m.getNota(),
@@ -104,10 +124,10 @@ public class TelaGerenciarMatriculas extends javax.swing.JFrame {
 
                 },
                 new String[] {
-                        "Matrícula", "Aluno", "Disciplina", "Nota", "Frequência"
+                        "ID", "Matrícula Aluno", "Aluno", "Disciplina", "Nota", "Frequência"
                 }) {
             boolean[] canEdit = new boolean[] {
-                    false, false, false, false, false
+                    false, false, false, false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -251,8 +271,8 @@ public class TelaGerenciarMatriculas extends javax.swing.JFrame {
             m = dao.findOne(m);
 
             if (m != null) {
-                String nomeAluno = (String) tableMatriculas.getValueAt(row, 1);
-                String nomeDisciplina = (String) tableMatriculas.getValueAt(row, 2);
+                String nomeAluno = (String) tableMatriculas.getValueAt(row, 2);
+                String nomeDisciplina = (String) tableMatriculas.getValueAt(row, 3);
 
                 TelaLancarNotas tela = new TelaLancarNotas(this, true);
                 tela.setMatricula(m, nomeAluno, nomeDisciplina);
@@ -275,7 +295,7 @@ public class TelaGerenciarMatriculas extends javax.swing.JFrame {
         }
 
         int id = (int) tableMatriculas.getValueAt(row, 0);
-        int confirm = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja excluir a matrícula ID " + id + "?",
+        int confirm = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja excluir esse registro?",
                 "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {

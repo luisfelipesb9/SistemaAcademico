@@ -94,4 +94,21 @@ public class DisciplinaDao implements Dao<Disciplina> {
         }
         return disciplina;
     }
+
+    public List<Disciplina> findByCurso(int idCurso) throws DAOException {
+        List<Disciplina> disciplinas = new ArrayList<>();
+        try {
+            String sQuery = "SELECT * FROM disciplinas WHERE id_curso = ?";
+            PreparedStatement st = conexao.prepareStatement(sQuery);
+            st.setInt(1, idCurso);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                disciplinas.add(new Disciplina(rs.getInt("id"), rs.getString("nome"), rs.getInt("carga_horaria"),
+                        rs.getInt("id_curso")));
+            }
+        } catch (SQLException ex) {
+            throw new DAOException("Erro ao buscar disciplinas do curso: " + ex.getMessage());
+        }
+        return disciplinas;
+    }
 }

@@ -14,6 +14,7 @@ public class TelaGerenciarCursos extends javax.swing.JFrame {
         tableCursos.getColumnModel().getColumn(0).setMinWidth(0);
         tableCursos.getColumnModel().getColumn(0).setMaxWidth(0);
         tableCursos.getColumnModel().getColumn(0).setWidth(0);
+        tableCursos.setAutoCreateRowSorter(true);
         listarCursos();
     }
 
@@ -61,6 +62,8 @@ public class TelaGerenciarCursos extends javax.swing.JFrame {
         jbCadastrar = new javax.swing.JButton();
         jbEditar = new javax.swing.JButton();
         jbExcluir = new javax.swing.JButton();
+        jbNovaDisciplina = new javax.swing.JButton();
+        jbVerDisciplinas = new javax.swing.JButton();
         jbVoltar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -121,6 +124,20 @@ public class TelaGerenciarCursos extends javax.swing.JFrame {
             }
         });
 
+        jbVerDisciplinas.setText("Ver Disciplinas");
+        jbVerDisciplinas.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbVerDisciplinasActionPerformed(evt);
+            }
+        });
+
+        jbNovaDisciplina.setText("Nova Disciplina");
+        jbNovaDisciplina.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbNovaDisciplinaActionPerformed(evt);
+            }
+        });
+
         jbVoltar.setText("Voltar");
         jbVoltar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -154,6 +171,10 @@ public class TelaGerenciarCursos extends javax.swing.JFrame {
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(jbExcluir)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jbNovaDisciplina)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jbVerDisciplinas)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(jbVoltar)))
                                 .addContainerGap()));
         jPanel1Layout.setVerticalGroup(
@@ -176,6 +197,8 @@ public class TelaGerenciarCursos extends javax.swing.JFrame {
                                         .addComponent(jbCadastrar)
                                         .addComponent(jbEditar)
                                         .addComponent(jbExcluir)
+                                        .addComponent(jbNovaDisciplina)
+                                        .addComponent(jbVerDisciplinas)
                                         .addComponent(jbVoltar))
                                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)));
 
@@ -277,12 +300,43 @@ public class TelaGerenciarCursos extends javax.swing.JFrame {
         }
     }
 
+    private void jbVerDisciplinasActionPerformed(java.awt.event.ActionEvent evt) {
+        int row = tableCursos.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um curso para ver as disciplinas.");
+            return;
+        }
+
+        int id = (int) tableCursos.getValueAt(row, 0);
+        String nome = (String) tableCursos.getValueAt(row, 1);
+
+        TelaVisualizarDisciplinas tela = new TelaVisualizarDisciplinas(this, true, id, nome);
+        tela.setVisible(true);
+    }
+
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
+
+    private void jbNovaDisciplinaActionPerformed(java.awt.event.ActionEvent evt) {
+        int row = tableCursos.getSelectedRow();
+        if (row == -1) {
+            JOptionPane.showMessageDialog(this, "Selecione um curso para cadastrar a disciplina.");
+            return;
+        }
+
+        int id = (int) tableCursos.getValueAt(row, 0);
+        String nome = (String) tableCursos.getValueAt(row, 1);
+
+        TelaCadastroDisciplina tela = new TelaCadastroDisciplina(this, true, id, nome);
+        tela.setVisible(true);
+    }
+
     private javax.swing.JButton jbCadastrar;
     private javax.swing.JButton jbEditar;
     private javax.swing.JButton jbExcluir;
+    private javax.swing.JButton jbVerDisciplinas;
+    private javax.swing.JButton jbNovaDisciplina;
     private javax.swing.JButton jbVoltar;
     private javax.swing.JButton jbListar;
     private javax.swing.JButton jbPesquisar;

@@ -211,9 +211,12 @@ public class TelaCadastroAluno extends javax.swing.JFrame {
                 CadastrarAlunoController controller = new CadastrarAlunoController();
                 try {
                         boolean retorno = controller.executa(panelPG11, idAluno);
-                        if (retorno)
-                                JOptionPane.showMessageDialog(this, "Aluno cadastrado com sucesso!");
-                        else
+                        if (retorno) {
+                                if (idAluno > 0)
+                                        JOptionPane.showMessageDialog(this, "Aluno editado com sucesso!");
+                                else
+                                        JOptionPane.showMessageDialog(this, "Aluno cadastrado com sucesso!");
+                        } else
                                 JOptionPane.showMessageDialog(this, "Aluno não cadastrado!");
                 } catch (SQLException ex) {
                         System.getLogger(TelaCadastroAluno.class.getName()).log(System.Logger.Level.ERROR,

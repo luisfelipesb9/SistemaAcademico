@@ -19,6 +19,11 @@ if %errorlevel% neq 0 (
 echo Copiando recursos (imagens)...
 xcopy /s /y "src\br\unimontes\ccet\dcc\pg1\view\images" "bin\br\unimontes\ccet\dcc\pg1\view\images\"
 
+echo Atualizando pasta build para IDE...
+if exist "build\classes" rmdir /s /q "build\classes"
+if not exist "build\classes" mkdir "build\classes"
+xcopy /s /y /i "bin" "build\classes"
+
 echo.
 echo Executando o projeto...
 java -cp bin;%LIB_JAR% br.unimontes.ccet.dcc.pg1.view.TelaPrincipal
