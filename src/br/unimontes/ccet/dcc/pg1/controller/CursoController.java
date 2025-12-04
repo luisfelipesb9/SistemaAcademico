@@ -1,19 +1,23 @@
 package br.unimontes.ccet.dcc.pg1.controller;
 
-import br.unimontes.ccet.dcc.pg1.model.dao.CursoDao;
+import br.unimontes.ccet.dcc.pg1.model.service.CursoService;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso;
 import br.unimontes.ccet.dcc.pg1.model.dao.exception.DAOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * Controller para operações de Curso.
+ * Usa CursoService para manter consistência arquitetural com AlunoController.
+ */
 public class CursoController {
 
-    private CursoDao dao;
+    private CursoService service;
 
     public CursoController() {
         try {
-            dao = new CursoDao();
+            service = new CursoService();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -21,9 +25,9 @@ public class CursoController {
 
     public List<Curso> listarTodos() {
         try {
-            if (dao == null)
+            if (service == null)
                 return new ArrayList<>();
-            return dao.findAll();
+            return service.listarTodos();
         } catch (DAOException e) {
             e.printStackTrace();
             return new ArrayList<>();
@@ -32,10 +36,9 @@ public class CursoController {
 
     public Curso buscarPorId(int id) {
         try {
-            if (dao == null)
+            if (service == null)
                 return null;
-            Curso c = new Curso(id, "Dummy", 0);
-            return dao.findOne(c);
+            return service.buscarPorId(id);
         } catch (DAOException e) {
             e.printStackTrace();
             return null;
@@ -44,13 +47,9 @@ public class CursoController {
 
     public boolean salvar(Curso curso) {
         try {
-            if (dao == null)
+            if (service == null)
                 return false;
-            if (curso.getId() > 0 && buscarPorId(curso.getId()) != null) {
-                return dao.update(curso) > 0;
-            } else {
-                return dao.save(curso) > 0;
-            }
+            return service.salvarCurso(curso);
         } catch (DAOException e) {
             e.printStackTrace();
             return false;
@@ -59,10 +58,9 @@ public class CursoController {
 
     public boolean excluir(int id) {
         try {
-            if (dao == null)
+            if (service == null)
                 return false;
-            Curso c = new Curso(id, "Dummy", 0);
-            return dao.delete(c) > 0;
+            return service.excluir(id);
         } catch (DAOException e) {
             e.printStackTrace();
             return false;
@@ -71,9 +69,9 @@ public class CursoController {
 
     public int count() {
         try {
-            if (dao == null)
+            if (service == null)
                 return 0;
-            return dao.count();
+            return service.count();
         } catch (SQLException e) {
             e.printStackTrace();
             return 0;

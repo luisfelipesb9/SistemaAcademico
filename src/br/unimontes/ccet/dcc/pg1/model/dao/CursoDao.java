@@ -13,15 +13,36 @@ public class CursoDao implements Dao<Curso> {
         conexao = DB.getInstancia().getConnection();
     }
 
+    /**
+     * Obtém o próximo ID disponível (último ID + 1).
+     * Isso garante que ao excluir um curso, o próximo criado continue a sequência.
+     */
+    public int getProximoId() throws SQLException {
+        String query = "SELECT COALESCE(MAX(id), 0) + 1 FROM cursos";
+        PreparedStatement st = conexao.prepareStatement(query);
+        ResultSet rs = st.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1);
+        }
+        return 1;
+    }
+
     @Override
     public int save(Curso entidade) throws DAOException {
         int linhasGravadas = 0;
         try {
-            String iQuery = "INSERT INTO cursos (nome, creditos) VALUES (?,?)";
-            PreparedStatement st = conexao.prepareStatement(iQuery, Statement.RETURN_GENERATED_KEYS);
-            st.setString(1, entidade.getNome());
-            st.setInt(2, entidade.getCreditos());
+            // Obtém o próximo ID disponível
+            int novoId = getProximoId();
+
+            String iQuery = "INSERT INTO cursos (id, nome, creditos) VALUES (?,?,?)";
+            PreparedStatement st = conexao.prepareStatement(iQuery);
+            st.setInt(1, novoId);
+            st.setString(2, entidade.getNome());
+            st.setInt(3, entidade.getCreditos());
             linhasGravadas = st.executeUpdate();
+
+            // Atualiza o ID na entidade
+            entidade.setId(novoId);
         } catch (SQLException ex) {
             throw new DAOException("Erro ao salvar Curso: " + ex.getMessage());
         }

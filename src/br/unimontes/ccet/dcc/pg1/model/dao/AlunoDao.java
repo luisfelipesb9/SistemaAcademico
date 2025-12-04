@@ -3,29 +3,57 @@ package br.unimontes.ccet.dcc.pg1.model.dao;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Aluno;
 import br.unimontes.ccet.dcc.pg1.model.dao.exception.DAOException;
 import java.util.List;
+import java.util.Random;
 import java.sql.*;
 
 public class AlunoDao implements Dao<Aluno> {
     private Connection conexao;
+    private static final Random random = new Random();
 
     public AlunoDao() throws SQLException {
         conexao = DB.getInstancia().getConnection();
+    }
+
+    /**
+     * Gera um número de matrícula único no formato 1000XXXXX (1000 + 5 dígitos
+     * aleatórios)
+     */
+    private int gerarMatricula() throws SQLException {
+        int matricula;
+        int tentativas = 0;
+        do {
+            // Gera número de 10000000 a 10099999 (formato 1000XXXXX)
+            matricula = 100000000 + random.nextInt(100000);
+            tentativas++;
+            if (tentativas > 100) {
+                throw new SQLException("Não foi possível gerar uma matrícula única após 100 tentativas");
+            }
+        } while (matriculaExiste(matricula));
+        return matricula;
+    }
+
+    private boolean matriculaExiste(int matricula) throws SQLException {
+        String query = "SELECT COUNT(*) FROM alunos WHERE id = ?";
+        PreparedStatement st = conexao.prepareStatement(query);
+        st.setInt(1, matricula);
+        ResultSet rs = st.executeQuery();
+        if (rs.next()) {
+            return rs.getInt(1) > 0;
+        }
+        return false;
     }
 
     @Override
     public int save(Aluno entidade) throws DAOException {
         int linhasGravadas = 0;
         try {
-            // Gera um RA seguindo a lógica: 1000 + 5 números aleatórios (ex: 100012345)
-            String prefix = "1000";
-            int randomPart = new java.util.Random().nextInt(100000); // 0 to 99999
-            String idStr = prefix + String.format("%05d", randomPart);
-            int novoId = Integer.parseInt(idStr);
-            entidade.setId(novoId);
+            // Gera matrícula no formato 1000XXXXX
+            int matricula = gerarMatricula();
+            entidade.setId(matricula);
 
             String iQuery = "INSERT INTO alunos (id, cpf, nome, ano_nascimento, id_curso) VALUES (?,?,?,?,?)";
             PreparedStatement st = conexao.prepareStatement(iQuery);
-            st.setInt(1, entidade.getId());
+            st.setInt(1, matricula);
             st.setString(2, entidade.getCpf());
             st.setString(3, entidade.getNome());
             st.setInt(4, entidade.getAnoNascimento());
@@ -35,7 +63,7 @@ public class AlunoDao implements Dao<Aluno> {
 
         } catch (SQLException ex) {
             if (ex.getErrorCode() == 1062 || ex.getMessage().contains("Duplicate entry")) {
-                throw new DAOException("Erro: Já existe um aluno com este ID ou CPF.");
+                throw new DAOException("Erro: Já existe um aluno com este CPF.");
             }
             throw new DAOException("Erro ao salvar Aluno: " + ex.getMessage());
         }

@@ -1,7 +1,9 @@
 package br.unimontes.ccet.dcc.pg1.view.panels;
 
 import br.unimontes.ccet.dcc.pg1.controller.CursoController;
+import br.unimontes.ccet.dcc.pg1.model.dao.ProfessorDao;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso;
+import br.unimontes.ccet.dcc.pg1.model.dao.entity.Professor;
 import br.unimontes.ccet.dcc.pg1.view.TelaCadastroCurso;
 import java.util.List;
 import javax.swing.JOptionPane;
@@ -10,9 +12,15 @@ import javax.swing.table.DefaultTableModel;
 public class CursoPanel extends javax.swing.JPanel {
 
     private CursoController cursoController;
+    private ProfessorDao professorDao;
 
     public CursoPanel() {
         cursoController = new CursoController();
+        try {
+            professorDao = new ProfessorDao();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         initComponents();
         listarCursos();
     }
@@ -24,10 +32,24 @@ public class CursoPanel extends javax.swing.JPanel {
             model.setNumRows(0);
 
             for (Curso c : cursos) {
+                // Busca o coordenador do curso
+                String nomeCoordenador = "Não definido";
+                if (professorDao != null) {
+                    try {
+                        Professor coord = professorDao.buscarCoordenadorPorCurso(c.getId());
+                        if (coord != null) {
+                            nomeCoordenador = coord.getNomeFormatado();
+                        }
+                    } catch (Exception ex) {
+                        // Ignora erro ao buscar coordenador
+                    }
+                }
+
                 model.addRow(new Object[] {
                         c.getId(),
                         c.getNome(),
-                        c.getCreditos()
+                        c.getCreditos(),
+                        nomeCoordenador
                 });
             }
         } catch (Exception e) {
@@ -51,8 +73,8 @@ public class CursoPanel extends javax.swing.JPanel {
 
         tableCursos.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
-                new String[] { "ID", "Nome", "Horas" }) {
-            boolean[] canEdit = new boolean[] { false, false, false };
+                new String[] { "ID", "Nome", "Horas", "Coordenador" }) {
+            boolean[] canEdit = new boolean[] { false, false, false, false };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
                 return canEdit[columnIndex];

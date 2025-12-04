@@ -1,9 +1,7 @@
 package br.unimontes.ccet.dcc.pg1.controller;
 
-import br.unimontes.ccet.dcc.pg1.model.dao.AlunoDao;
-import br.unimontes.ccet.dcc.pg1.model.dao.MatriculaDao;
+import br.unimontes.ccet.dcc.pg1.model.service.AlunoService;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Aluno;
-import br.unimontes.ccet.dcc.pg1.model.dao.entity.Matricula;
 import br.unimontes.ccet.dcc.pg1.model.dao.exception.DAOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -11,11 +9,11 @@ import java.util.ArrayList;
 
 public class AlunoController {
 
-    private AlunoDao dao;
+    private AlunoService service;
 
     public AlunoController() {
         try {
-            dao = new AlunoDao();
+            service = new AlunoService();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -23,9 +21,9 @@ public class AlunoController {
 
     public List<Aluno> listarTodos() {
         try {
-            if (dao == null)
+            if (service == null)
                 return new ArrayList<>();
-            return dao.findAll();
+            return service.listarTodos();
         } catch (DAOException e) {
             e.printStackTrace();
             return new ArrayList<>();
@@ -34,10 +32,9 @@ public class AlunoController {
 
     public Aluno buscarPorId(int id) {
         try {
-            if (dao == null)
+            if (service == null)
                 return null;
-            Aluno a = new Aluno(id, "000.000.000-00", "Dummy", 2000, 0);
-            return dao.findOne(a);
+            return service.buscarPorId(id);
         } catch (DAOException e) {
             e.printStackTrace();
             return null;
@@ -46,24 +43,9 @@ public class AlunoController {
 
     public boolean salvar(Aluno aluno) {
         try {
-            if (dao == null)
+            if (service == null)
                 return false;
-
-            if (aluno.getId() > 0 && buscarPorId(aluno.getId()) != null) {
-                return dao.update(aluno) > 0;
-            } else {
-                boolean salvo = dao.save(aluno) > 0;
-                if (salvo) {
-                    try {
-                        MatriculaDao mDao = new MatriculaDao();
-                        Matricula m = new Matricula(aluno.getId(), aluno.getIdCurso());
-                        mDao.save(m);
-                    } catch (SQLException | DAOException e) {
-                        System.err.println("Erro ao criar matrícula automática: " + e.getMessage());
-                    }
-                }
-                return salvo;
-            }
+            return service.salvarAluno(aluno);
         } catch (DAOException e) {
             e.printStackTrace();
             return false;
@@ -72,10 +54,9 @@ public class AlunoController {
 
     public boolean excluir(int id) {
         try {
-            if (dao == null)
+            if (service == null)
                 return false;
-            Aluno a = new Aluno(id, "000.000.000-00", "Dummy", 2000, 0);
-            return dao.delete(a) > 0;
+            return service.excluir(id);
         } catch (DAOException e) {
             e.printStackTrace();
             return false;
@@ -84,9 +65,9 @@ public class AlunoController {
 
     public int count() {
         try {
-            if (dao == null)
+            if (service == null)
                 return 0;
-            return dao.count();
+            return service.count();
         } catch (SQLException e) {
             e.printStackTrace();
             return 0;
