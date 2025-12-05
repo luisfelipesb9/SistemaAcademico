@@ -6,28 +6,32 @@ import javax.swing.JOptionPane;
 
 public class TelaDashboard extends javax.swing.JFrame {
 
+        private DashboardController controller;
+
         public TelaDashboard() {
+                controller = new DashboardController();
                 initComponents();
                 setLocationRelativeTo(null);
-                carregarDados();
+                atualizarDados();
         }
 
-        private void carregarDados() {
+        /**
+         * Atualiza os componentes visuais com dados do controller.
+         * View apenas exibe dados - toda lógica está no Controller.
+         */
+        private void atualizarDados() {
                 try {
-                        DashboardController controller = new DashboardController();
-                        Map<String, Integer> dados = controller.getDadosDashboard();
+                        Map<String, Object> dados = controller.getDadosCompletoDashboard();
 
-                        int totalAlunos = dados.get("alunos");
-                        int totalCursos = dados.get("cursos");
-                        int totalMatriculas = dados.get("matriculas");
+                        // Atualizar labels (apenas exibição)
+                        lblValorAlunos.setText(String.valueOf(dados.get("totalAlunos")));
+                        lblValorCursos.setText(String.valueOf(dados.get("totalCursos")));
+                        lblValorMatriculas.setText(String.valueOf(dados.get("totalMatriculas")));
 
-                        lblValorAlunos.setText(String.valueOf(totalAlunos));
-                        lblValorCursos.setText(String.valueOf(totalCursos));
-                        lblValorMatriculas.setText(String.valueOf(totalMatriculas));
-
-                        pbAlunos.setValue(Math.min(totalAlunos * 10, 100));
-                        pbCursos.setValue(Math.min(totalCursos * 2, 100));
-                        pbMatriculas.setValue(Math.min(totalMatriculas * 5, 100));
+                        // Atualizar progress bars (valores já calculados pelo controller)
+                        pbAlunos.setValue((int) dados.get("pbAlunos"));
+                        pbCursos.setValue((int) dados.get("pbCursos"));
+                        pbMatriculas.setValue((int) dados.get("pbMatriculas"));
 
                 } catch (Exception ex) {
                         JOptionPane.showMessageDialog(this, "Erro ao carregar dados do dashboard: " + ex.getMessage());
@@ -245,7 +249,7 @@ public class TelaDashboard extends javax.swing.JFrame {
                 jbAtualizar.setText("Atualizar Dados");
                 jbAtualizar.addActionListener(new java.awt.event.ActionListener() {
                         public void actionPerformed(java.awt.event.ActionEvent evt) {
-                                carregarDados();
+                                atualizarDados();
                         }
                 });
 

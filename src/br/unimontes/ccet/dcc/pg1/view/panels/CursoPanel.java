@@ -1,9 +1,7 @@
 package br.unimontes.ccet.dcc.pg1.view.panels;
 
 import br.unimontes.ccet.dcc.pg1.controller.CursoController;
-import br.unimontes.ccet.dcc.pg1.model.dao.ProfessorDao;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso;
-import br.unimontes.ccet.dcc.pg1.model.dao.entity.Professor;
 import br.unimontes.ccet.dcc.pg1.view.TelaCadastroCurso;
 import br.unimontes.ccet.dcc.pg1.view.components.PlaceholderTextField;
 import br.unimontes.ccet.dcc.pg1.view.components.ZebraTableRenderer;
@@ -14,15 +12,9 @@ import javax.swing.table.DefaultTableModel;
 public class CursoPanel extends javax.swing.JPanel {
 
     private CursoController cursoController;
-    private ProfessorDao professorDao;
 
     public CursoPanel() {
         cursoController = new CursoController();
-        try {
-            professorDao = new ProfessorDao();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         initComponents();
         listarCursos();
     }
@@ -31,43 +23,20 @@ public class CursoPanel extends javax.swing.JPanel {
         listarCursos(null);
     }
 
+    /**
+     * Atualiza a tabela com dados do controller.
+     * Panel apenas exibe dados - toda lógica de busca e filtro está no Controller.
+     */
     private void listarCursos(String termoPesquisa) {
         try {
-            List<Curso> cursos = cursoController.listarTodos();
+            // Controller retorna dados já formatados e filtrados (incluindo coordenador)
+            List<Object[]> dados = cursoController.listarCursosParaTabela(termoPesquisa);
+
             DefaultTableModel model = (DefaultTableModel) tableCursos.getModel();
             model.setNumRows(0);
 
-            for (Curso c : cursos) {
-                // Busca o coordenador do curso
-                String nomeCoordenador = "Não definido";
-                if (professorDao != null) {
-                    try {
-                        Professor coord = professorDao.buscarCoordenadorPorCurso(c.getId());
-                        if (coord != null) {
-                            nomeCoordenador = coord.getNomeFormatado();
-                        }
-                    } catch (Exception ex) {
-                        // Ignora erro ao buscar coordenador
-                    }
-                }
-
-                // Filtro de pesquisa
-                if (termoPesquisa != null && !termoPesquisa.isBlank()) {
-                    String termo = termoPesquisa.toLowerCase();
-                    boolean matches = c.getNome().toLowerCase().contains(termo) ||
-                            String.valueOf(c.getId()).contains(termo) ||
-                            nomeCoordenador.toLowerCase().contains(termo);
-                    if (!matches) {
-                        continue;
-                    }
-                }
-
-                model.addRow(new Object[] {
-                        c.getId(),
-                        c.getNome(),
-                        c.getCreditos(),
-                        nomeCoordenador
-                });
+            for (Object[] row : dados) {
+                model.addRow(row);
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro ao listar cursos: " + e.getMessage());
@@ -280,16 +249,12 @@ public class CursoPanel extends javax.swing.JPanel {
                 "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            if (cursoController.excluir(id)) {
+            // Controller retorna Response - View decide como exibir
+            br.unimontes.ccet.dcc.pg1.controller.Response resultado = cursoController.excluir(id);
+            JOptionPane.showMessageDialog(this, resultado.getMensagem());
+
+            if (resultado.isSucesso()) {
                 listarCursos();
-                JOptionPane.showMessageDialog(this, "Curso excluído com sucesso!");
-            } else {
-                String erro = cursoController.getUltimoErro();
-                if (erro != null) {
-                    JOptionPane.showMessageDialog(this, erro, "Erro ao Excluir", JOptionPane.WARNING_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Erro ao excluir curso.");
-                }
             }
         }
     }

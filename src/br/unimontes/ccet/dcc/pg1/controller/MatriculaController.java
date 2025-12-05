@@ -105,4 +105,53 @@ public class MatriculaController {
             return 0;
         }
     }
+
+    /**
+     * Lista todas as matrículas com dados formatados para a tabela.
+     * Inclui nome do aluno e nome do curso.
+     */
+    public List<Object[]> listarMatriculasParaTabela(String termoPesquisa) {
+        List<Object[]> resultado = new java.util.ArrayList<>();
+        try {
+            if (dao == null)
+                return resultado;
+
+            List<Matricula> matriculas = dao.findAll();
+            br.unimontes.ccet.dcc.pg1.controller.CursoController cursoController = new br.unimontes.ccet.dcc.pg1.controller.CursoController();
+
+            for (Matricula m : matriculas) {
+                String nomeAluno = "N/A";
+                String nomeCurso = "N/A";
+                try {
+                    Aluno a = alunoDao.findOne(new Aluno(m.getIdAluno(), "000.000.000-00", "Dummy", 2000, 0));
+                    if (a != null) {
+                        nomeAluno = a.getNome();
+                        br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso c = cursoController
+                                .buscarPorId(m.getIdCurso());
+                        if (c != null) {
+                            nomeCurso = c.getNome();
+                        }
+                    }
+                } catch (Exception ex) {
+                    // Ignora erro
+                }
+
+                // Filtro de pesquisa
+                if (termoPesquisa != null && !termoPesquisa.isBlank()) {
+                    String termo = termoPesquisa.toLowerCase();
+                    boolean matches = nomeAluno.toLowerCase().contains(termo) ||
+                            String.valueOf(m.getIdAluno()).contains(termo) ||
+                            nomeCurso.toLowerCase().contains(termo);
+                    if (!matches) {
+                        continue;
+                    }
+                }
+
+                resultado.add(new Object[] { m.getIdAluno(), nomeAluno, nomeCurso });
+            }
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
+        return resultado;
+    }
 }

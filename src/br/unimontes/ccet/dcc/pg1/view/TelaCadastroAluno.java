@@ -1,7 +1,6 @@
 package br.unimontes.ccet.dcc.pg1.view;
 
 import br.unimontes.ccet.dcc.pg1.controller.AlunoController;
-import br.unimontes.ccet.dcc.pg1.controller.CursoController;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Aluno;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso;
 import java.util.List;
@@ -10,22 +9,25 @@ import javax.swing.JOptionPane;
 public class TelaCadastroAluno extends javax.swing.JFrame {
 
         private AlunoController alunoController;
-        private CursoController cursoController;
+        private List<Curso> cursosList;
         private int idAluno = 0;
 
         public TelaCadastroAluno() {
                 alunoController = new AlunoController();
-                cursoController = new CursoController();
                 initComponents();
                 setLocationRelativeTo(null);
-                carregarCursos();
+                carregarCursosNoCombo();
         }
 
-        private void carregarCursos() {
+        /**
+         * Carrega os cursos no combo usando o controller.
+         * View apenas popula o combo - lógica de busca está no controller.
+         */
+        private void carregarCursosNoCombo() {
                 try {
-                        List<Curso> cursos = cursoController.listarTodos();
+                        cursosList = alunoController.listarCursosParaCombo();
                         cbCurso.removeAllItems();
-                        for (Curso c : cursos) {
+                        for (Curso c : cursosList) {
                                 cbCurso.addItem(c);
                         }
                 } catch (Exception e) {
@@ -33,6 +35,10 @@ public class TelaCadastroAluno extends javax.swing.JFrame {
                 }
         }
 
+        /**
+         * Preenche o formulário com dados do aluno para edição.
+         * Controller determina o índice do curso no combo.
+         */
         public void setAluno(Aluno aluno) {
                 this.idAluno = aluno.getId();
                 tfNome.setText(aluno.getNome());
@@ -40,12 +46,10 @@ public class TelaCadastroAluno extends javax.swing.JFrame {
                 tfCpf.setEditable(false);
                 tfAnoNascimento.setText(String.valueOf(aluno.getAnoNascimento()));
 
-                for (int i = 0; i < cbCurso.getItemCount(); i++) {
-                        Curso c = cbCurso.getItemAt(i);
-                        if (c.getId() == aluno.getIdCurso()) {
-                                cbCurso.setSelectedIndex(i);
-                                break;
-                        }
+                // Controller retorna o índice correto do curso
+                int indiceCurso = alunoController.getIndiceCursoParaAluno(aluno, cursosList);
+                if (indiceCurso >= 0) {
+                        cbCurso.setSelectedIndex(indiceCurso);
                 }
 
                 jbCadastrar.setText("Salvar Alterações");
@@ -179,22 +183,28 @@ public class TelaCadastroAluno extends javax.swing.JFrame {
                 pack();
         }
 
+        /**
+         * Processa cadastro/edição de aluno.
+         * View apenas exibe mensagens - validações e lógica estão no Controller.
+         */
         private void jbCadastrarActionPerformed(java.awt.event.ActionEvent evt) {
+                String nome = tfNome.getText();
+                String cpf = tfCpf.getText();
+                String anoNascimento = tfAnoNascimento.getText();
+                Curso curso = (Curso) cbCurso.getSelectedItem();
+
+                // Controller faz a validação
+                br.unimontes.ccet.dcc.pg1.controller.Response validacao = alunoController.validarAluno(nome, cpf,
+                                anoNascimento, curso);
+
+                if (!validacao.isSucesso()) {
+                        JOptionPane.showMessageDialog(this, validacao.getMensagem());
+                        return;
+                }
+
                 try {
-                        String nome = tfNome.getText();
-                        if (nome.matches(".*\\d.*")) {
-                                JOptionPane.showMessageDialog(this, "O nome não pode conter números.");
-                                return;
-                        }
-                        String cpf = tfCpf.getText();
-                        int ano = Integer.parseInt(tfAnoNascimento.getText());
-                        Curso curso = (Curso) cbCurso.getSelectedItem();
-
-                        if (curso == null) {
-                                JOptionPane.showMessageDialog(this, "Selecione um curso.");
-                                return;
-                        }
-
+                        // Criar aluno e salvar
+                        int ano = Integer.parseInt(anoNascimento);
                         Aluno aluno;
                         if (idAluno > 0) {
                                 aluno = new Aluno(idAluno, cpf, nome, ano, curso.getId());
@@ -202,17 +212,15 @@ public class TelaCadastroAluno extends javax.swing.JFrame {
                                 aluno = new Aluno(cpf, nome, ano, curso.getId());
                         }
 
-                        if (alunoController.salvar(aluno)) {
-                                String msg = (idAluno > 0) ? "Aluno editado com sucesso!" : "Aluno salvo com sucesso!";
-                                JOptionPane.showMessageDialog(this, msg);
+                        // Controller retorna Response - View decide como exibir
+                        br.unimontes.ccet.dcc.pg1.controller.Response resultado = alunoController.salvar(aluno);
+                        JOptionPane.showMessageDialog(this, resultado.getMensagem());
+
+                        if (resultado.isSucesso()) {
                                 dispose();
-                        } else {
-                                JOptionPane.showMessageDialog(this, "Erro ao salvar aluno.");
                         }
-                } catch (NumberFormatException e) {
-                        JOptionPane.showMessageDialog(this, "Ano de nascimento inválido.");
-                } catch (Exception e) {
-                        JOptionPane.showMessageDialog(this, "Erro: " + e.getMessage());
+                } catch (br.unimontes.ccet.dcc.pg1.model.dao.exception.DAOException e) {
+                        JOptionPane.showMessageDialog(this, e.getMessage());
                 }
         }
 

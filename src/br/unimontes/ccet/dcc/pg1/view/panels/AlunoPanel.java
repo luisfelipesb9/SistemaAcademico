@@ -1,9 +1,7 @@
 package br.unimontes.ccet.dcc.pg1.view.panels;
 
 import br.unimontes.ccet.dcc.pg1.controller.AlunoController;
-import br.unimontes.ccet.dcc.pg1.controller.CursoController;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Aluno;
-import br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso;
 import br.unimontes.ccet.dcc.pg1.view.TelaCadastroAluno;
 import br.unimontes.ccet.dcc.pg1.view.components.PlaceholderTextField;
 import br.unimontes.ccet.dcc.pg1.view.components.ZebraTableRenderer;
@@ -14,11 +12,9 @@ import javax.swing.table.DefaultTableModel;
 public class AlunoPanel extends javax.swing.JPanel {
 
     private AlunoController alunoController;
-    private CursoController cursoController;
 
     public AlunoPanel() {
         alunoController = new AlunoController();
-        cursoController = new CursoController();
         initComponents();
         listarAlunos();
     }
@@ -27,37 +23,20 @@ public class AlunoPanel extends javax.swing.JPanel {
         listarAlunos(null);
     }
 
+    /**
+     * Atualiza a tabela com dados do controller.
+     * Panel apenas exibe dados - toda lógica de busca e filtro está no Controller.
+     */
     private void listarAlunos(String nomePesquisa) {
         try {
-            List<Aluno> alunos = alunoController.listarTodos();
-            List<Curso> cursos = cursoController.listarTodos();
+            // Controller retorna dados já formatados e filtrados
+            List<Object[]> dados = alunoController.listarAlunosParaTabela(nomePesquisa);
 
             DefaultTableModel model = (DefaultTableModel) tableAlunos.getModel();
             model.setNumRows(0);
 
-            for (Aluno a : alunos) {
-                if (nomePesquisa != null && !nomePesquisa.isBlank()) {
-                    String termo = nomePesquisa.toLowerCase();
-                    boolean matches = a.getNome().toLowerCase().contains(termo) ||
-                            String.valueOf(a.getId()).contains(termo);
-                    if (!matches) {
-                        continue;
-                    }
-                }
-
-                String nomeCurso = "N/A";
-                for (Curso c : cursos) {
-                    if (c.getId() == a.getIdCurso()) {
-                        nomeCurso = c.getNome();
-                        break;
-                    }
-                }
-
-                model.addRow(new Object[] {
-                        a.getId(),
-                        a.getNome(),
-                        nomeCurso
-                });
+            for (Object[] row : dados) {
+                model.addRow(row);
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro ao listar alunos: " + e.getMessage());
@@ -272,12 +251,12 @@ public class AlunoPanel extends javax.swing.JPanel {
                 "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            if (alunoController.excluir(id)) {
+            // Controller retorna Response - View decide como exibir
+            br.unimontes.ccet.dcc.pg1.controller.Response resultado = alunoController.excluir(id);
+            JOptionPane.showMessageDialog(this, resultado.getMensagem());
+
+            if (resultado.isSucesso()) {
                 listarAlunos();
-                JOptionPane.showMessageDialog(this, "Aluno excluído com sucesso!");
-            } else {
-                JOptionPane.showMessageDialog(this,
-                        "Erro ao excluir aluno. Verifique se existem matrículas associadas.");
             }
         }
     }

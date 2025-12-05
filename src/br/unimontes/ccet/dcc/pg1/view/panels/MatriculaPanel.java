@@ -1,7 +1,7 @@
 package br.unimontes.ccet.dcc.pg1.view.panels;
 
 import br.unimontes.ccet.dcc.pg1.controller.MatriculaController;
-import br.unimontes.ccet.dcc.pg1.model.dao.entity.Matricula;
+import br.unimontes.ccet.dcc.pg1.controller.AlunoController;
 import br.unimontes.ccet.dcc.pg1.view.components.PlaceholderTextField;
 import br.unimontes.ccet.dcc.pg1.view.components.ZebraTableRenderer;
 import java.util.List;
@@ -11,11 +11,11 @@ import javax.swing.table.DefaultTableModel;
 public class MatriculaPanel extends javax.swing.JPanel {
 
     private MatriculaController matriculaController;
-    private br.unimontes.ccet.dcc.pg1.controller.AlunoController alunoController;
+    private AlunoController alunoController;
 
     public MatriculaPanel() {
         matriculaController = new MatriculaController();
-        alunoController = new br.unimontes.ccet.dcc.pg1.controller.AlunoController();
+        alunoController = new AlunoController();
         initComponents();
         listarMatriculas();
     }
@@ -24,47 +24,20 @@ public class MatriculaPanel extends javax.swing.JPanel {
         listarMatriculas(null);
     }
 
+    /**
+     * Atualiza a tabela com dados do controller.
+     * Panel apenas exibe dados - toda lógica de busca e filtro está no Controller.
+     */
     private void listarMatriculas(String termoPesquisa) {
         try {
-            List<Matricula> matriculas = matriculaController.listarTodas();
+            // Controller retorna dados já formatados e filtrados
+            List<Object[]> dados = matriculaController.listarMatriculasParaTabela(termoPesquisa);
+
             DefaultTableModel model = (DefaultTableModel) tableMatriculas.getModel();
             model.setNumRows(0);
 
-            br.unimontes.ccet.dcc.pg1.controller.CursoController cursoController = new br.unimontes.ccet.dcc.pg1.controller.CursoController();
-
-            for (Matricula m : matriculas) {
-                String nomeAluno = "N/A";
-                String nomeCurso = "N/A";
-                try {
-                    br.unimontes.ccet.dcc.pg1.model.dao.entity.Aluno a = alunoController.buscarPorId(m.getIdAluno());
-                    if (a != null) {
-                        nomeAluno = a.getNome();
-                        br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso c = cursoController
-                                .buscarPorId(m.getIdCurso());
-                        if (c != null) {
-                            nomeCurso = c.getNome();
-                        }
-                    }
-                } catch (Exception ex) {
-                    // Ignora erro
-                }
-
-                // Filtro de pesquisa
-                if (termoPesquisa != null && !termoPesquisa.isBlank()) {
-                    String termo = termoPesquisa.toLowerCase();
-                    boolean matches = nomeAluno.toLowerCase().contains(termo) ||
-                            String.valueOf(m.getIdAluno()).contains(termo) ||
-                            nomeCurso.toLowerCase().contains(termo);
-                    if (!matches) {
-                        continue;
-                    }
-                }
-
-                model.addRow(new Object[] {
-                        m.getIdAluno(),
-                        nomeAluno,
-                        nomeCurso
-                });
+            for (Object[] row : dados) {
+                model.addRow(row);
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Erro ao listar matrículas: " + e.getMessage());

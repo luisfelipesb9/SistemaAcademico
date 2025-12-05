@@ -1,7 +1,6 @@
 package br.unimontes.ccet.dcc.pg1.view;
 
 import br.unimontes.ccet.dcc.pg1.controller.CursoController;
-import br.unimontes.ccet.dcc.pg1.model.dao.ProfessorDao;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Professor;
 import javax.swing.JOptionPane;
@@ -9,38 +8,30 @@ import javax.swing.JOptionPane;
 public class TelaCadastroCurso extends javax.swing.JFrame {
 
         private CursoController cursoController;
-        private ProfessorDao professorDao;
         private Curso cursoEdicao;
         private Professor coordenadorEdicao;
 
         public TelaCadastroCurso() {
                 cursoController = new CursoController();
-                try {
-                        professorDao = new ProfessorDao();
-                } catch (Exception e) {
-                        e.printStackTrace();
-                }
                 initComponents();
                 setLocationRelativeTo(null);
         }
 
+        /**
+         * Preenche o formulário com dados do curso para edição.
+         * Controller busca o coordenador - View apenas exibe.
+         */
         public void setCurso(Curso curso) {
                 this.cursoEdicao = curso;
                 tfNome.setText(curso.getNome());
                 tfCreditos.setText(String.valueOf(curso.getCreditos()));
                 jbCadastrar.setText("Salvar Alterações");
 
-                // Carregar dados do coordenador se existir
-                if (professorDao != null) {
-                        try {
-                                coordenadorEdicao = professorDao.buscarCoordenadorPorCurso(curso.getId());
-                                if (coordenadorEdicao != null) {
-                                        tfCoordenador.setText(coordenadorEdicao.getNome());
-                                        cbTitulacao.setSelectedItem(coordenadorEdicao.getTitulacao());
-                                }
-                        } catch (Exception e) {
-                                e.printStackTrace();
-                        }
+                // Controller busca o coordenador
+                coordenadorEdicao = cursoController.buscarCoordenadorPorCurso(curso.getId());
+                if (coordenadorEdicao != null) {
+                        tfCoordenador.setText(coordenadorEdicao.getNome());
+                        cbTitulacao.setSelectedItem(coordenadorEdicao.getTitulacao());
                 }
         }
 
@@ -177,57 +168,56 @@ public class TelaCadastroCurso extends javax.swing.JFrame {
                 pack();
         }
 
+        /**
+         * Processa cadastro/edição de curso.
+         * View apenas exibe mensagens - validações e lógica estão no Controller.
+         */
         private void jbCadastrarActionPerformed(java.awt.event.ActionEvent evt) {
-                try {
-                        String nome = tfNome.getText();
-                        int creditos = Integer.parseInt(tfCreditos.getText());
-                        String nomeCoordenador = tfCoordenador.getText().trim();
-                        String titulacao = (String) cbTitulacao.getSelectedItem();
+                String nome = tfNome.getText();
+                String creditos = tfCreditos.getText();
+                String nomeCoordenador = tfCoordenador.getText().trim();
+                String titulacao = (String) cbTitulacao.getSelectedItem();
 
-                        Curso curso;
-                        if (cursoEdicao != null) {
-                                curso = new Curso(cursoEdicao.getId(), nome, creditos);
-                        } else {
-                                curso = new Curso(nome, creditos);
-                        }
+                // Controller faz a validação
+                br.unimontes.ccet.dcc.pg1.controller.Response validacao = cursoController.validarCurso(nome, creditos);
 
-                        if (cursoController.salvar(curso)) {
-                                // Salvar/atualizar coordenador se foi informado
-                                if (!nomeCoordenador.isEmpty() && professorDao != null) {
-                                        try {
-                                                if (coordenadorEdicao != null) {
-                                                        // Atualizar coordenador existente
-                                                        Professor p = new Professor(
-                                                                        coordenadorEdicao.getId(),
-                                                                        nomeCoordenador,
-                                                                        titulacao,
-                                                                        curso.getId());
-                                                        professorDao.update(p);
-                                                } else {
-                                                        // Criar novo coordenador
-                                                        Professor p = new Professor(
-                                                                        0,
-                                                                        nomeCoordenador,
-                                                                        titulacao,
-                                                                        curso.getId());
-                                                        professorDao.save(p);
-                                                }
-                                        } catch (Exception e) {
-                                                System.err.println("Erro ao salvar coordenador: " + e.getMessage());
-                                        }
+                if (!validacao.isSucesso()) {
+                        JOptionPane.showMessageDialog(this, validacao.getMensagem());
+                        return;
+                }
+
+                int creditosInt = Integer.parseInt(creditos);
+                Curso curso;
+                if (cursoEdicao != null) {
+                        curso = new Curso(cursoEdicao.getId(), nome, creditosInt);
+                } else {
+                        curso = new Curso(nome, creditosInt);
+                }
+
+                // Controller retorna Response
+                br.unimontes.ccet.dcc.pg1.controller.Response resultado = cursoController.salvar(curso);
+
+                if (resultado.isSucesso()) {
+                        // Pegar o curso salvo do Response para ter o ID correto
+                        Curso cursoSalvo = resultado.getDadosAs(Curso.class);
+
+                        // Salvar coordenador se informado
+                        if (!nomeCoordenador.isEmpty()) {
+                                Professor p;
+                                if (coordenadorEdicao != null) {
+                                        p = new Professor(coordenadorEdicao.getId(), nomeCoordenador, titulacao,
+                                                        cursoSalvo != null ? cursoSalvo.getId() : curso.getId());
+                                } else {
+                                        p = new Professor(0, nomeCoordenador, titulacao,
+                                                        cursoSalvo != null ? cursoSalvo.getId() : curso.getId());
                                 }
-
-                                String mensagem = cursoEdicao != null ? "Curso editado com sucesso!"
-                                                : "Curso cadastrado com sucesso!";
-                                JOptionPane.showMessageDialog(this, mensagem);
-                                dispose();
-                        } else {
-                                JOptionPane.showMessageDialog(this, "Erro ao salvar curso.");
+                                cursoController.salvarCoordenador(p);
                         }
-                } catch (NumberFormatException e) {
-                        JOptionPane.showMessageDialog(this, "Registro inválido.");
-                } catch (Exception e) {
-                        JOptionPane.showMessageDialog(this, "Erro: " + e.getMessage());
+
+                        JOptionPane.showMessageDialog(this, resultado.getMensagem());
+                        dispose();
+                } else {
+                        JOptionPane.showMessageDialog(this, resultado.getMensagem());
                 }
         }
 

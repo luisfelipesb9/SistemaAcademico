@@ -18,4 +18,32 @@ public class DashboardController {
 
         return dados;
     }
+
+    /**
+     * Retorna dados completos para o dashboard, incluindo valores do progress bar.
+     * Move a lógica de cálculo que antes estava na View.
+     */
+    public Map<String, Object> getDadosCompletoDashboard() {
+        Map<String, Object> dados = new HashMap<>();
+
+        AlunoController alunoController = new AlunoController();
+        CursoController cursoController = new CursoController();
+        MatriculaController matriculaController = new MatriculaController();
+
+        int totalAlunos = alunoController.count();
+        int totalCursos = cursoController.count();
+        int totalMatriculas = matriculaController.count();
+
+        // Valores para labels
+        dados.put("totalAlunos", totalAlunos);
+        dados.put("totalCursos", totalCursos);
+        dados.put("totalMatriculas", totalMatriculas);
+
+        // Valores calculados para progress bars (lógica movida da View)
+        dados.put("pbAlunos", Math.min(totalAlunos * 10, 100));
+        dados.put("pbCursos", Math.min(totalCursos * 2, 100));
+        dados.put("pbMatriculas", Math.min(totalMatriculas * 5, 100));
+
+        return dados;
+    }
 }
