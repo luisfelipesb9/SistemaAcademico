@@ -39,11 +39,11 @@ public class TelaPrincipal extends javax.swing.JFrame {
         jbSair = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Sistema Acadêmico - PG1");
+        setTitle("RenêLabs");
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24));
         jLabel1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        jLabel1.setText("Sistema Acadêmico");
+        jLabel1.setText("RenêLabs");
 
         jPanelDashboard.setBorder(javax.swing.BorderFactory.createTitledBorder("Dashboard"));
 

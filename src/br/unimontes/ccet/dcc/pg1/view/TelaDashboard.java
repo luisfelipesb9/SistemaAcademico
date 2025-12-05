@@ -55,7 +55,7 @@ public class TelaDashboard extends javax.swing.JFrame {
                 jbFechar = new javax.swing.JButton();
 
                 setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-                setTitle("Dashboard - Sistema Acadêmico");
+                setTitle("Dashboard - RenêLabs");
 
                 jPanelHeader.setBackground(new java.awt.Color(0, 102, 204));
 
