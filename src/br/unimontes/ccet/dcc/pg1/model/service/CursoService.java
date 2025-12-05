@@ -45,7 +45,6 @@ public class CursoService {
      * @throws DAOException se houver alunos no curso
      */
     public boolean excluir(int id) throws DAOException {
-        // Verificar se existem alunos vinculados ao curso
         List<Aluno> alunos = alunoDao.findAll();
         long alunosNoCurso = alunos.stream()
                 .filter(a -> a.getIdCurso() == id)
@@ -57,10 +56,8 @@ public class CursoService {
                     + "Remova os alunos primeiro.");
         }
 
-        // Excluir o coordenador vinculado ao curso (se existir)
         professorDao.deleteByIdCurso(id);
 
-        // Agora excluir o curso
         Curso c = new Curso(id, "Dummy", 0);
         return cursoDao.delete(c) > 0;
     }

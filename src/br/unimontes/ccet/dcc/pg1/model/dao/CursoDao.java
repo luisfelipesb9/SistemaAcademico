@@ -31,7 +31,6 @@ public class CursoDao implements Dao<Curso> {
     public int save(Curso entidade) throws DAOException {
         int linhasGravadas = 0;
         try {
-            // Obtém o próximo ID disponível
             int novoId = getProximoId();
 
             String iQuery = "INSERT INTO cursos (id, nome, creditos) VALUES (?,?,?)";
@@ -40,8 +39,6 @@ public class CursoDao implements Dao<Curso> {
             st.setString(2, entidade.getNome());
             st.setInt(3, entidade.getCreditos());
             linhasGravadas = st.executeUpdate();
-
-            // Atualiza o ID na entidade
             entidade.setId(novoId);
         } catch (SQLException ex) {
             throw new DAOException("Erro ao salvar Curso: " + ex.getMessage());

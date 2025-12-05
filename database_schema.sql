@@ -2,14 +2,12 @@ DROP DATABASE IF EXISTS sistema_academico;
 CREATE DATABASE sistema_academico;
 USE sistema_academico;
 
--- Table: Cursos (IDs sequenciais gerenciados pela aplicação)
 CREATE TABLE cursos (
     id INT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    creditos INT NOT NULL -- Representa Horas do curso
+    creditos INT NOT NULL
 ) ENGINE=InnoDB;
 
--- Table: Professores (Vinculados a um curso)
 CREATE TABLE professores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -18,9 +16,8 @@ CREATE TABLE professores (
     FOREIGN KEY (id_curso) REFERENCES cursos(id)
 ) ENGINE=InnoDB;
 
--- Table: Alunos (ID é a matrícula no formato 1000XXXXX)
 CREATE TABLE alunos (
-    id INT PRIMARY KEY,  -- Matrícula no formato 1000XXXXX (sem AUTO_INCREMENT)
+    id INT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     cpf VARCHAR(14) NOT NULL,
     ano_nascimento INT NOT NULL,
@@ -28,7 +25,6 @@ CREATE TABLE alunos (
     FOREIGN KEY (id_curso) REFERENCES cursos(id)
 ) ENGINE=InnoDB;
 
--- Table: Matriculas (Aluno -> Curso)
 CREATE TABLE matriculas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_aluno INT NOT NULL,
@@ -38,11 +34,6 @@ CREATE TABLE matriculas (
     FOREIGN KEY (id_curso) REFERENCES cursos(id)
 ) ENGINE=InnoDB;
 
--- ==========================================
--- INSERÇÃO DE DADOS (DATA SEEDING)
--- ==========================================
-
--- 1. Inserir Cursos (com IDs explícitos)
 INSERT INTO cursos (id, nome, creditos) VALUES
 (1, 'Sistemas de Informação', 3000),
 (2, 'Engenharia Civil', 3600),
@@ -55,7 +46,6 @@ INSERT INTO cursos (id, nome, creditos) VALUES
 (9, 'Ciência da Computação', 3200),
 (10, 'Odontologia', 4500);
 
--- 2. Inserir Professores (Vinculados a Cursos)
 INSERT INTO professores (nome, titulacao, id_curso) VALUES
 ('Dr. João Silva', 'Doutorado', 2),
 ('Msc. Pedro Santos', 'Mestrado', 1),
@@ -68,7 +58,6 @@ INSERT INTO professores (nome, titulacao, id_curso) VALUES
 ('Dr. Carlos Mendes', 'Doutorado', 10),
 ('Msc. Juliana Rocha', 'Mestrado', 9);
 
--- 3. Inserir Alunos (IDs no formato 1000XXXXX - matrícula)
 INSERT INTO alunos (id, nome, cpf, ano_nascimento, id_curso) VALUES
 (100012345, 'Carlos Souza', '111.111.111-11', 2000, 1),
 (100023456, 'Fernanda Lima', '222.222.222-22', 2001, 1),
@@ -91,7 +80,6 @@ INSERT INTO alunos (id, nome, cpf, ano_nascimento, id_curso) VALUES
 (100099999, 'Neymar Jr', '202.020.202-02', 2004, 10),
 (100010101, 'Oscar Niemeyer', '212.121.212-12', 1998, 6);
 
--- 4. Inserir Matrículas (Aluno -> Curso)
 INSERT INTO matriculas (id_aluno, id_curso) VALUES
 (100012345, 1),
 (100023456, 1),

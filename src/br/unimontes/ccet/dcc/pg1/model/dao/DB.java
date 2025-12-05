@@ -15,7 +15,6 @@ public class DB {
         try (InputStream input = DB.class.getResourceAsStream("/db.properties")) {
             if (input == null) {
                 System.out.println("Sorry, unable to find db.properties");
-                // Fallback or throw exception
                 url = "jdbc:mariadb://localhost/sistema_academico";
             } else {
                 props.load(input);

@@ -47,7 +47,6 @@ public class AlunoDao implements Dao<Aluno> {
     public int save(Aluno entidade) throws DAOException {
         int linhasGravadas = 0;
         try {
-            // Gera matrícula no formato 1000XXXXX
             int matricula = gerarMatricula();
             entidade.setId(matricula);
 

@@ -86,7 +86,6 @@ public class AlunoPanel extends javax.swing.JPanel {
                 jbPesquisarActionPerformed(evt);
             }
         });
-        // Enter para pesquisar
         tfPesquisa.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
@@ -106,7 +105,6 @@ public class AlunoPanel extends javax.swing.JPanel {
         });
         tableAlunos.setAutoCreateRowSorter(true);
         tableAlunos.setDefaultRenderer(Object.class, new ZebraTableRenderer());
-        // Double-click para editar
         tableAlunos.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 if (evt.getClickCount() == 2) {

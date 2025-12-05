@@ -18,20 +18,15 @@ public class AlunoService {
     }
 
     public boolean salvarAluno(Aluno aluno) throws DAOException {
-        // Se o aluno já tem ID, é uma atualização
         if (aluno.getId() > 0) {
             return alunoDao.update(aluno) > 0;
         } else {
-            // Novo aluno
             boolean salvo = alunoDao.save(aluno) > 0;
             if (salvo) {
                 try {
-                    // Regra de negócio: Criar matrícula automaticamente
                     Matricula m = new Matricula(aluno.getId(), aluno.getIdCurso());
                     matriculaDao.save(m);
                 } catch (DAOException e) {
-                    // Se falhar a matrícula, talvez devêssemos desfazer o aluno?
-                    // Por enquanto, apenas logamos o erro, conforme o original.
                     System.err.println("Erro ao criar matrícula automática: " + e.getMessage());
                 }
             }
