@@ -217,7 +217,9 @@ public class TelaCadastroCurso extends javax.swing.JFrame {
                                         }
                                 }
 
-                                JOptionPane.showMessageDialog(this, "Curso salvo com sucesso!");
+                                String mensagem = cursoEdicao != null ? "Curso editado com sucesso!"
+                                                : "Curso cadastrado com sucesso!";
+                                JOptionPane.showMessageDialog(this, mensagem);
                                 dispose();
                         } else {
                                 JOptionPane.showMessageDialog(this, "Erro ao salvar curso.");

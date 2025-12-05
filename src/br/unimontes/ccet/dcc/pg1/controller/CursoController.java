@@ -56,15 +56,22 @@ public class CursoController {
         }
     }
 
+    private String ultimoErro = null;
+
     public boolean excluir(int id) {
+        ultimoErro = null;
         try {
             if (service == null)
                 return false;
             return service.excluir(id);
         } catch (DAOException e) {
-            e.printStackTrace();
+            ultimoErro = e.getMessage();
             return false;
         }
+    }
+
+    public String getUltimoErro() {
+        return ultimoErro;
     }
 
     public int count() {

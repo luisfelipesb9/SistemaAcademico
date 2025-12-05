@@ -5,6 +5,8 @@ import br.unimontes.ccet.dcc.pg1.controller.CursoController;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Aluno;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso;
 import br.unimontes.ccet.dcc.pg1.view.TelaCadastroAluno;
+import br.unimontes.ccet.dcc.pg1.view.components.PlaceholderTextField;
+import br.unimontes.ccet.dcc.pg1.view.components.ZebraTableRenderer;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -65,7 +67,7 @@ public class AlunoPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
-        tfPesquisa = new javax.swing.JTextField();
+        tfPesquisa = new PlaceholderTextField("Pesquisar aluno por nome ou matrícula...");
         jbPesquisar = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tableAlunos = new javax.swing.JTable();
@@ -77,10 +79,19 @@ public class AlunoPanel extends javax.swing.JPanel {
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18));
         jLabel1.setText("Gerenciar Alunos");
 
-        jbPesquisar.setText("Pesquisar");
+        jbPesquisar.setText("🔍 Pesquisar");
+        jbPesquisar.setToolTipText("Pesquisar alunos por nome ou matrícula");
         jbPesquisar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbPesquisarActionPerformed(evt);
+            }
+        });
+        // Enter para pesquisar
+        tfPesquisa.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    jbPesquisarActionPerformed(null);
+                }
             }
         });
 
@@ -94,30 +105,43 @@ public class AlunoPanel extends javax.swing.JPanel {
             }
         });
         tableAlunos.setAutoCreateRowSorter(true);
+        tableAlunos.setDefaultRenderer(Object.class, new ZebraTableRenderer());
+        // Double-click para editar
+        tableAlunos.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (evt.getClickCount() == 2) {
+                    jbEditarActionPerformed(null);
+                }
+            }
+        });
         jScrollPane1.setViewportView(tableAlunos);
 
-        jbListar.setText("Listar Todos");
+        jbListar.setText("📋 Listar Todos");
+        jbListar.setToolTipText("Exibir todos os alunos cadastrados");
         jbListar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbListarActionPerformed(evt);
             }
         });
 
-        jbCadastrar.setText("Cadastrar");
+        jbCadastrar.setText("➕ Cadastrar");
+        jbCadastrar.setToolTipText("Cadastrar novo aluno no sistema");
         jbCadastrar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbCadastrarActionPerformed(evt);
             }
         });
 
-        jbEditar.setText("Editar");
+        jbEditar.setText("✏️ Editar");
+        jbEditar.setToolTipText("Editar aluno selecionado");
         jbEditar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbEditarActionPerformed(evt);
             }
         });
 
-        jbExcluir.setText("Excluir");
+        jbExcluir.setText("🗑️ Excluir");
+        jbExcluir.setToolTipText("Excluir aluno selecionado");
         jbExcluir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbExcluirActionPerformed(evt);
@@ -125,7 +149,8 @@ public class AlunoPanel extends javax.swing.JPanel {
         });
 
         jbVoltar = new javax.swing.JButton();
-        jbVoltar.setText("Voltar");
+        jbVoltar.setText("← Voltar");
+        jbVoltar.setToolTipText("Voltar para a tela anterior");
         jbVoltar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 java.awt.Window w = javax.swing.SwingUtilities.getWindowAncestor(AlunoPanel.this);
@@ -186,10 +211,11 @@ public class AlunoPanel extends javax.swing.JPanel {
     }
 
     private void jbPesquisarActionPerformed(java.awt.event.ActionEvent evt) {
-        listarAlunos(tfPesquisa.getText());
+        listarAlunos(tfPesquisa.getRealText());
     }
 
     private void jbListarActionPerformed(java.awt.event.ActionEvent evt) {
+        tfPesquisa.clear();
         listarAlunos();
     }
 
@@ -267,5 +293,5 @@ public class AlunoPanel extends javax.swing.JPanel {
     private javax.swing.JButton jbPesquisar;
     private javax.swing.JButton jbVoltar;
     private javax.swing.JTable tableAlunos;
-    private javax.swing.JTextField tfPesquisa;
+    private PlaceholderTextField tfPesquisa;
 }

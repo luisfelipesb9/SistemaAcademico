@@ -1,5 +1,7 @@
 package br.unimontes.ccet.dcc.pg1.view;
 
+import br.unimontes.ccet.dcc.pg1.view.components.PlaceholderTextField;
+import br.unimontes.ccet.dcc.pg1.view.components.PlaceholderPasswordField;
 import javax.swing.JOptionPane;
 
 public class TelaLogin extends javax.swing.JFrame {
@@ -14,9 +16,9 @@ public class TelaLogin extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
-        tfUsuario = new javax.swing.JTextField();
+        tfUsuario = new PlaceholderTextField("Digite seu usuário...");
         jLabel3 = new javax.swing.JLabel();
-        pfSenha = new javax.swing.JPasswordField();
+        pfSenha = new PlaceholderPasswordField("Digite sua senha...");
         jbEntrar = new javax.swing.JButton();
         lblLogo = new javax.swing.JLabel();
 
@@ -32,7 +34,7 @@ public class TelaLogin extends javax.swing.JFrame {
 
         jLabel3.setText("Senha");
 
-        jbEntrar.setText("Entrar");
+        jbEntrar.setText("\uD83D\uDD10 Entrar");
         jbEntrar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbEntrarActionPerformed(evt);
@@ -112,8 +114,8 @@ public class TelaLogin extends javax.swing.JFrame {
     }
 
     private void jbEntrarActionPerformed(java.awt.event.ActionEvent evt) {
-        String usuario = tfUsuario.getText();
-        String senha = new String(pfSenha.getPassword());
+        String usuario = tfUsuario.getRealText();
+        String senha = pfSenha.getRealPassword();
 
         if (usuario.equals("admin") && senha.equals("123")) {
             TelaPrincipal principal = new TelaPrincipal();
@@ -157,7 +159,7 @@ public class TelaLogin extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel3;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JButton jbEntrar;
-    private javax.swing.JPasswordField pfSenha;
-    private javax.swing.JTextField tfUsuario;
+    private PlaceholderPasswordField pfSenha;
+    private PlaceholderTextField tfUsuario;
     private javax.swing.JLabel lblLogo;
 }

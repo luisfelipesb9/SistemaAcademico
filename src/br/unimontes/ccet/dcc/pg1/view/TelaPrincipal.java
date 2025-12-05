@@ -1,7 +1,5 @@
 package br.unimontes.ccet.dcc.pg1.view;
 
-import javax.swing.JOptionPane;
-
 public class TelaPrincipal extends javax.swing.JFrame {
 
     public TelaPrincipal() {

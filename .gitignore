@@ -1,0 +1,25 @@
+# Arquivos compilados
+bin/
+build/
+dist/
+*.class
+
+# Configurações IDE
+.settings/
+.idea/
+*.iml
+.vscode/settings.json
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.bak
+
+# Arquivos de guia de estudo
+GUIA_DE_ESTUDO.md

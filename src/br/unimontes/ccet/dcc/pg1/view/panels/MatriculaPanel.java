@@ -2,6 +2,8 @@ package br.unimontes.ccet.dcc.pg1.view.panels;
 
 import br.unimontes.ccet.dcc.pg1.controller.MatriculaController;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Matricula;
+import br.unimontes.ccet.dcc.pg1.view.components.PlaceholderTextField;
+import br.unimontes.ccet.dcc.pg1.view.components.ZebraTableRenderer;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -19,6 +21,10 @@ public class MatriculaPanel extends javax.swing.JPanel {
     }
 
     private void listarMatriculas() {
+        listarMatriculas(null);
+    }
+
+    private void listarMatriculas(String termoPesquisa) {
         try {
             List<Matricula> matriculas = matriculaController.listarTodas();
             DefaultTableModel model = (DefaultTableModel) tableMatriculas.getModel();
@@ -43,6 +49,17 @@ public class MatriculaPanel extends javax.swing.JPanel {
                     // Ignora erro
                 }
 
+                // Filtro de pesquisa
+                if (termoPesquisa != null && !termoPesquisa.isBlank()) {
+                    String termo = termoPesquisa.toLowerCase();
+                    boolean matches = nomeAluno.toLowerCase().contains(termo) ||
+                            String.valueOf(m.getIdAluno()).contains(termo) ||
+                            nomeCurso.toLowerCase().contains(termo);
+                    if (!matches) {
+                        continue;
+                    }
+                }
+
                 model.addRow(new Object[] {
                         m.getIdAluno(),
                         nomeAluno,
@@ -57,6 +74,8 @@ public class MatriculaPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
+        tfPesquisa = new PlaceholderTextField("Pesquisar por nome, matrícula ou curso...");
+        jbPesquisar = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tableMatriculas = new javax.swing.JTable();
         jbNovaMatricula = new javax.swing.JButton();
@@ -66,6 +85,22 @@ public class MatriculaPanel extends javax.swing.JPanel {
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18));
         jLabel1.setText("Gerenciar Matrículas");
+
+        jbPesquisar.setText("🔍 Pesquisar");
+        jbPesquisar.setToolTipText("Pesquisar matrículas");
+        jbPesquisar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbPesquisarActionPerformed(evt);
+            }
+        });
+        // Enter para pesquisar
+        tfPesquisa.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    jbPesquisarActionPerformed(null);
+                }
+            }
+        });
 
         tableMatriculas.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
@@ -77,23 +112,35 @@ public class MatriculaPanel extends javax.swing.JPanel {
             }
         });
         tableMatriculas.setAutoCreateRowSorter(true);
+        tableMatriculas.setDefaultRenderer(Object.class, new ZebraTableRenderer());
+        // Double-click para editar
+        tableMatriculas.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (evt.getClickCount() == 2) {
+                    jbEditarActionPerformed(null);
+                }
+            }
+        });
         jScrollPane1.setViewportView(tableMatriculas);
 
-        jbNovaMatricula.setText("Nova Matrícula");
+        jbNovaMatricula.setText("➕ Nova Matrícula");
+        jbNovaMatricula.setToolTipText("Cadastrar um novo aluno com matrícula");
         jbNovaMatricula.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbNovaMatriculaActionPerformed(evt);
             }
         });
 
-        jbExcluir.setText("Excluir Selecionada");
+        jbExcluir.setText("🗑️ Excluir Selecionada");
+        jbExcluir.setToolTipText("Excluir matrícula (remove também o aluno)");
         jbExcluir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbExcluirActionPerformed(evt);
             }
         });
 
-        jbAtualizar.setText("Atualizar");
+        jbAtualizar.setText("📋 Listar Todos");
+        jbAtualizar.setToolTipText("Recarregar lista de matrículas");
         jbAtualizar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbAtualizarActionPerformed(evt);
@@ -101,14 +148,16 @@ public class MatriculaPanel extends javax.swing.JPanel {
         });
 
         jbEditar = new javax.swing.JButton();
-        jbEditar.setText("Editar");
+        jbEditar.setText("✏️ Editar");
+        jbEditar.setToolTipText("Editar dados do aluno selecionado");
         jbEditar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbEditarActionPerformed(evt);
             }
         });
 
-        jbVoltar.setText("Voltar");
+        jbVoltar.setText("← Voltar");
+        jbVoltar.setToolTipText("Voltar para a tela anterior");
         jbVoltar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 java.awt.Window w = javax.swing.SwingUtilities.getWindowAncestor(MatriculaPanel.this);
@@ -130,6 +179,10 @@ public class MatriculaPanel extends javax.swing.JPanel {
                                                 .addComponent(jLabel1)
                                                 .addGap(0, 0, Short.MAX_VALUE))
                                         .addGroup(layout.createSequentialGroup()
+                                                .addComponent(tfPesquisa)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jbPesquisar))
+                                        .addGroup(layout.createSequentialGroup()
                                                 .addComponent(jbNovaMatricula)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(jbExcluir)
@@ -147,7 +200,13 @@ public class MatriculaPanel extends javax.swing.JPanel {
                                 .addContainerGap()
                                 .addComponent(jLabel1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(tfPesquisa, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jbPesquisar))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(jbNovaMatricula)
@@ -156,6 +215,10 @@ public class MatriculaPanel extends javax.swing.JPanel {
                                         .addComponent(jbAtualizar)
                                         .addComponent(jbVoltar))
                                 .addContainerGap()));
+    }
+
+    private void jbPesquisarActionPerformed(java.awt.event.ActionEvent evt) {
+        listarMatriculas(tfPesquisa.getRealText());
     }
 
     private void jbNovaMatriculaActionPerformed(java.awt.event.ActionEvent evt) {
@@ -177,36 +240,18 @@ public class MatriculaPanel extends javax.swing.JPanel {
             return;
         }
 
-        int id = (int) tableMatriculas.getValueAt(row, 0);
+        int idAluno = (int) tableMatriculas.getValueAt(row, 0);
+        String nomeAluno = (String) tableMatriculas.getValueAt(row, 1);
+
         int confirm = JOptionPane.showConfirmDialog(this,
-                "Tem certeza que deseja excluir a matrícula ID " + id + "?",
-                "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
+                "Deseja excluir a matrícula do aluno " + nomeAluno
+                        + "?\n\nATENÇÃO: O aluno também será removido do sistema!",
+                "Confirmar Exclusão", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            // The controller expects an object with the ID set.
-            // Since we changed DAO to delete by id_aluno, we need to make sure we pass an
-            // object with id_aluno set.
-            // However, the controller's delete method takes an int 'id' and sets it to 'id'
-            // of the entity.
-            // We need to update the controller or the way we call it.
-            // Actually, let's update the Controller to be clear or just rely on the DAO
-            // change.
-            // In DAO delete(Matricula m), we now use m.getIdAluno().
-            // So we need to create a Matricula object with idAluno set.
-
-            // But wait, the controller 'excluir(int id)' does: m.setId(id); return
-            // dao.delete(m);
-            // And DAO.delete uses m.getIdAluno() now (per my previous edit plan).
-            // So m.setId(id) sets the internal ID, but m.getIdAluno() will be 0!
-            // I need to update the Controller to set idAluno, OR update DAO to use getId()
-            // if I want to treat the input as ID.
-
-            // CORRECT FIX: The table shows 'Matrícula' (id_aluno) in column 0.
-            // So 'id' variable here IS 'id_aluno'.
-            // I should update the Controller to handle this.
-            if (matriculaController.excluirPorAluno(id)) {
+            if (matriculaController.excluirPorAluno(idAluno)) {
                 listarMatriculas();
-                JOptionPane.showMessageDialog(this, "Matrícula excluída com sucesso!");
+                JOptionPane.showMessageDialog(this, "Matrícula e aluno excluídos com sucesso!");
             } else {
                 JOptionPane.showMessageDialog(this, "Erro ao excluir matrícula.");
             }
@@ -214,12 +259,9 @@ public class MatriculaPanel extends javax.swing.JPanel {
     }
 
     private void jbAtualizarActionPerformed(java.awt.event.ActionEvent evt) {
+        tfPesquisa.clear();
         listarMatriculas();
     }
-
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JButton jbAtualizar;
 
     private void jbEditarActionPerformed(java.awt.event.ActionEvent evt) {
         int row = tableMatriculas.getSelectedRow();
@@ -247,9 +289,14 @@ public class MatriculaPanel extends javax.swing.JPanel {
         }
     }
 
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JButton jbAtualizar;
     private javax.swing.JButton jbExcluir;
     private javax.swing.JButton jbEditar;
     private javax.swing.JButton jbNovaMatricula;
+    private javax.swing.JButton jbPesquisar;
     private javax.swing.JButton jbVoltar;
     private javax.swing.JTable tableMatriculas;
+    private PlaceholderTextField tfPesquisa;
 }

@@ -5,6 +5,8 @@ import br.unimontes.ccet.dcc.pg1.model.dao.ProfessorDao;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Professor;
 import br.unimontes.ccet.dcc.pg1.view.TelaCadastroCurso;
+import br.unimontes.ccet.dcc.pg1.view.components.PlaceholderTextField;
+import br.unimontes.ccet.dcc.pg1.view.components.ZebraTableRenderer;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
@@ -26,6 +28,10 @@ public class CursoPanel extends javax.swing.JPanel {
     }
 
     private void listarCursos() {
+        listarCursos(null);
+    }
+
+    private void listarCursos(String termoPesquisa) {
         try {
             List<Curso> cursos = cursoController.listarTodos();
             DefaultTableModel model = (DefaultTableModel) tableCursos.getModel();
@@ -45,6 +51,17 @@ public class CursoPanel extends javax.swing.JPanel {
                     }
                 }
 
+                // Filtro de pesquisa
+                if (termoPesquisa != null && !termoPesquisa.isBlank()) {
+                    String termo = termoPesquisa.toLowerCase();
+                    boolean matches = c.getNome().toLowerCase().contains(termo) ||
+                            String.valueOf(c.getId()).contains(termo) ||
+                            nomeCoordenador.toLowerCase().contains(termo);
+                    if (!matches) {
+                        continue;
+                    }
+                }
+
                 model.addRow(new Object[] {
                         c.getId(),
                         c.getNome(),
@@ -60,6 +77,8 @@ public class CursoPanel extends javax.swing.JPanel {
     private void initComponents() {
 
         jLabel1 = new javax.swing.JLabel();
+        tfPesquisa = new PlaceholderTextField("Pesquisar curso, ID ou coordenador...");
+        jbPesquisar = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tableCursos = new javax.swing.JTable();
         jbCadastrar = new javax.swing.JButton();
@@ -71,6 +90,22 @@ public class CursoPanel extends javax.swing.JPanel {
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 18));
         jLabel1.setText("Gerenciar Cursos");
 
+        jbPesquisar.setText("🔍 Pesquisar");
+        jbPesquisar.setToolTipText("Pesquisar cursos por nome, ID ou coordenador");
+        jbPesquisar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jbPesquisarActionPerformed(evt);
+            }
+        });
+        // Enter para pesquisar
+        tfPesquisa.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                if (evt.getKeyCode() == java.awt.event.KeyEvent.VK_ENTER) {
+                    jbPesquisarActionPerformed(null);
+                }
+            }
+        });
+
         tableCursos.setModel(new javax.swing.table.DefaultTableModel(
                 new Object[][] {},
                 new String[] { "ID", "Nome", "Horas", "Coordenador" }) {
@@ -81,37 +116,51 @@ public class CursoPanel extends javax.swing.JPanel {
             }
         });
         tableCursos.setAutoCreateRowSorter(true);
+        tableCursos.setDefaultRenderer(Object.class, new ZebraTableRenderer());
+        // Double-click para editar
+        tableCursos.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (evt.getClickCount() == 2) {
+                    jbEditarActionPerformed(null);
+                }
+            }
+        });
         jScrollPane1.setViewportView(tableCursos);
 
-        jbCadastrar.setText("Cadastrar Novo Curso");
+        jbCadastrar.setText("➕ Cadastrar Novo Curso");
+        jbCadastrar.setToolTipText("Cadastrar um novo curso no sistema");
         jbCadastrar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbCadastrarActionPerformed(evt);
             }
         });
 
-        jbExcluir.setText("Excluir Selecionado");
+        jbExcluir.setText("🗑️ Excluir Selecionado");
+        jbExcluir.setToolTipText("Excluir curso selecionado (somente se não houver alunos)");
         jbExcluir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbExcluirActionPerformed(evt);
             }
         });
 
-        jbEditar.setText("Editar Curso");
+        jbEditar.setText("✏️ Editar Curso");
+        jbEditar.setToolTipText("Editar dados do curso selecionado");
         jbEditar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbEditarActionPerformed(evt);
             }
         });
 
-        jbAtualizar.setText("Atualizar Lista");
+        jbAtualizar.setText("📋 Listar Todos");
+        jbAtualizar.setToolTipText("Recarregar lista de cursos");
         jbAtualizar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jbAtualizarActionPerformed(evt);
             }
         });
 
-        jbVoltar.setText("Voltar");
+        jbVoltar.setText("← Voltar");
+        jbVoltar.setToolTipText("Voltar para a tela anterior");
         jbVoltar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 java.awt.Window w = javax.swing.SwingUtilities.getWindowAncestor(CursoPanel.this);
@@ -133,6 +182,10 @@ public class CursoPanel extends javax.swing.JPanel {
                                                 .addComponent(jLabel1)
                                                 .addGap(0, 0, Short.MAX_VALUE))
                                         .addGroup(layout.createSequentialGroup()
+                                                .addComponent(tfPesquisa)
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addComponent(jbPesquisar))
+                                        .addGroup(layout.createSequentialGroup()
                                                 .addComponent(jbCadastrar)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                 .addComponent(jbEditar)
@@ -150,7 +203,13 @@ public class CursoPanel extends javax.swing.JPanel {
                                 .addContainerGap()
                                 .addComponent(jLabel1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(tfPesquisa, javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(jbPesquisar))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 245, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(jbCadastrar)
@@ -159,6 +218,10 @@ public class CursoPanel extends javax.swing.JPanel {
                                         .addComponent(jbAtualizar)
                                         .addComponent(jbVoltar))
                                 .addContainerGap()));
+    }
+
+    private void jbPesquisarActionPerformed(java.awt.event.ActionEvent evt) {
+        listarCursos(tfPesquisa.getRealText());
     }
 
     private void jbCadastrarActionPerformed(java.awt.event.ActionEvent evt) {
@@ -213,7 +276,7 @@ public class CursoPanel extends javax.swing.JPanel {
         String nome = (String) tableCursos.getValueAt(row, 1);
 
         int confirm = JOptionPane.showConfirmDialog(this,
-                "Devo excluir o curso " + nome + "?",
+                "Deseja excluir o curso " + nome + "?",
                 "Confirmar Exclusão", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
@@ -221,12 +284,18 @@ public class CursoPanel extends javax.swing.JPanel {
                 listarCursos();
                 JOptionPane.showMessageDialog(this, "Curso excluído com sucesso!");
             } else {
-                JOptionPane.showMessageDialog(this, "Erro ao excluir curso. Verifique se existem alunos vinculados.");
+                String erro = cursoController.getUltimoErro();
+                if (erro != null) {
+                    JOptionPane.showMessageDialog(this, erro, "Erro ao Excluir", JOptionPane.WARNING_MESSAGE);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Erro ao excluir curso.");
+                }
             }
         }
     }
 
     private void jbAtualizarActionPerformed(java.awt.event.ActionEvent evt) {
+        tfPesquisa.clear();
         listarCursos();
     }
 
@@ -236,6 +305,8 @@ public class CursoPanel extends javax.swing.JPanel {
     private javax.swing.JButton jbCadastrar;
     private javax.swing.JButton jbEditar;
     private javax.swing.JButton jbExcluir;
+    private javax.swing.JButton jbPesquisar;
     private javax.swing.JButton jbVoltar;
     private javax.swing.JTable tableCursos;
+    private PlaceholderTextField tfPesquisa;
 }

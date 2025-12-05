@@ -1,6 +1,9 @@
 package br.unimontes.ccet.dcc.pg1.model.service;
 
+import br.unimontes.ccet.dcc.pg1.model.dao.AlunoDao;
 import br.unimontes.ccet.dcc.pg1.model.dao.CursoDao;
+import br.unimontes.ccet.dcc.pg1.model.dao.ProfessorDao;
+import br.unimontes.ccet.dcc.pg1.model.dao.entity.Aluno;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso;
 import br.unimontes.ccet.dcc.pg1.model.dao.exception.DAOException;
 import java.sql.SQLException;
@@ -9,9 +12,13 @@ import java.util.List;
 public class CursoService {
 
     private CursoDao cursoDao;
+    private AlunoDao alunoDao;
+    private ProfessorDao professorDao;
 
     public CursoService() throws SQLException {
         this.cursoDao = new CursoDao();
+        this.alunoDao = new AlunoDao();
+        this.professorDao = new ProfessorDao();
     }
 
     public boolean salvarCurso(Curso curso) throws DAOException {
@@ -31,7 +38,29 @@ public class CursoService {
         return cursoDao.findOne(c);
     }
 
+    /**
+     * Exclui um curso se não houver alunos vinculados.
+     * Remove também o coordenador associado.
+     * 
+     * @throws DAOException se houver alunos no curso
+     */
     public boolean excluir(int id) throws DAOException {
+        // Verificar se existem alunos vinculados ao curso
+        List<Aluno> alunos = alunoDao.findAll();
+        long alunosNoCurso = alunos.stream()
+                .filter(a -> a.getIdCurso() == id)
+                .count();
+
+        if (alunosNoCurso > 0) {
+            throw new DAOException("Não é possível excluir o curso pois existem "
+                    + alunosNoCurso + " aluno(s) matriculado(s). "
+                    + "Remova os alunos primeiro.");
+        }
+
+        // Excluir o coordenador vinculado ao curso (se existir)
+        professorDao.deleteByIdCurso(id);
+
+        // Agora excluir o curso
         Curso c = new Curso(id, "Dummy", 0);
         return cursoDao.delete(c) > 0;
     }

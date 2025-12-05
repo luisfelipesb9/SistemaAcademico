@@ -2,11 +2,11 @@ DROP DATABASE IF EXISTS sistema_academico;
 CREATE DATABASE sistema_academico;
 USE sistema_academico;
 
--- Table: Cursos
+-- Table: Cursos (IDs sequenciais gerenciados pela aplicação)
 CREATE TABLE cursos (
-    id INT AUTO_INCREMENT PRIMARY KEY,
+    id INT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
-    creditos INT NOT NULL -- Agora representa Horas
+    creditos INT NOT NULL -- Representa Horas do curso
 ) ENGINE=InnoDB;
 
 -- Table: Professores (Vinculados a um curso)
@@ -42,31 +42,31 @@ CREATE TABLE matriculas (
 -- INSERÇÃO DE DADOS (DATA SEEDING)
 -- ==========================================
 
--- 1. Inserir Cursos
-INSERT INTO cursos (nome, creditos) VALUES
-('Sistemas de Informação', 3000),
-('Engenharia Civil', 3600),
-('Direito', 3700),
-('Medicina', 7200),
-('Engenharia de Software', 3200),
-('Arquitetura e Urbanismo', 3600),
-('Psicologia', 4000),
-('Administração', 3000),
-('Ciência da Computação', 3200),
-('Odontologia', 4500);
+-- 1. Inserir Cursos (com IDs explícitos)
+INSERT INTO cursos (id, nome, creditos) VALUES
+(1, 'Sistemas de Informação', 3000),
+(2, 'Engenharia Civil', 3600),
+(3, 'Direito', 3700),
+(4, 'Medicina', 7200),
+(5, 'Engenharia de Software', 3200),
+(6, 'Arquitetura e Urbanismo', 3600),
+(7, 'Psicologia', 4000),
+(8, 'Administração', 3000),
+(9, 'Ciência da Computação', 3200),
+(10, 'Odontologia', 4500);
 
 -- 2. Inserir Professores (Vinculados a Cursos)
 INSERT INTO professores (nome, titulacao, id_curso) VALUES
-('Dr. João Silva', 'Doutorado', 2), -- Civil
-('Msc. Pedro Santos', 'Mestrado', 1), -- SI
-('Dra. Maria Oliveira', 'Doutorado', 3), -- Direito
-('Dr. Roberto Campos', 'Doutorado', 4), -- Medicina
-('Msc. Ana Pereira', 'Mestrado', 5), -- Eng Software
-('Esp. Lucas Costa', 'Especialista', 8), -- Adm
-('Dra. Fernanda Lima', 'Doutorado', 7), -- Psicologia
-('Msc. Bruno Souza', 'Mestrado', 6), -- Arq
-('Dr. Carlos Mendes', 'Doutorado', 10), -- Odonto
-('Msc. Juliana Rocha', 'Mestrado', 9); -- CC
+('Dr. João Silva', 'Doutorado', 2),
+('Msc. Pedro Santos', 'Mestrado', 1),
+('Dra. Maria Oliveira', 'Doutorado', 3),
+('Dr. Roberto Campos', 'Doutorado', 4),
+('Msc. Ana Pereira', 'Mestrado', 5),
+('Esp. Lucas Costa', 'Especialista', 8),
+('Dra. Fernanda Lima', 'Doutorado', 7),
+('Msc. Bruno Souza', 'Mestrado', 6),
+('Dr. Carlos Mendes', 'Doutorado', 10),
+('Msc. Juliana Rocha', 'Mestrado', 9);
 
 -- 3. Inserir Alunos (IDs no formato 1000XXXXX - matrícula)
 INSERT INTO alunos (id, nome, cpf, ano_nascimento, id_curso) VALUES
