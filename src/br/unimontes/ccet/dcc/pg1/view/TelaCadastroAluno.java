@@ -185,7 +185,7 @@ public class TelaCadastroAluno extends javax.swing.JFrame {
 
         /**
          * Processa cadastro/edição de aluno.
-         * View apenas exibe mensagens - validações e lógica estão no Controller.
+         * View apenas envia dados - Controller cria entidade e salva.
          */
         private void jbCadastrarActionPerformed(java.awt.event.ActionEvent evt) {
                 String nome = tfNome.getText();
@@ -202,25 +202,13 @@ public class TelaCadastroAluno extends javax.swing.JFrame {
                         return;
                 }
 
-                try {
-                        // Criar aluno e salvar
-                        int ano = Integer.parseInt(anoNascimento);
-                        Aluno aluno;
-                        if (idAluno > 0) {
-                                aluno = new Aluno(idAluno, cpf, nome, ano, curso.getId());
-                        } else {
-                                aluno = new Aluno(cpf, nome, ano, curso.getId());
-                        }
+                // Controller cria a entidade e salva - View não toca em entidades
+                br.unimontes.ccet.dcc.pg1.controller.Response resultado = alunoController.criarESalvarAluno(
+                                nome, cpf, anoNascimento, curso.getId(), idAluno);
+                JOptionPane.showMessageDialog(this, resultado.getMensagem());
 
-                        // Controller retorna Response - View decide como exibir
-                        br.unimontes.ccet.dcc.pg1.controller.Response resultado = alunoController.salvar(aluno);
-                        JOptionPane.showMessageDialog(this, resultado.getMensagem());
-
-                        if (resultado.isSucesso()) {
-                                dispose();
-                        }
-                } catch (br.unimontes.ccet.dcc.pg1.model.dao.exception.DAOException e) {
-                        JOptionPane.showMessageDialog(this, e.getMessage());
+                if (resultado.isSucesso()) {
+                        dispose();
                 }
         }
 

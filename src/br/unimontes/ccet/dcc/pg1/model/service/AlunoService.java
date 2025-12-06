@@ -19,8 +19,30 @@ public class AlunoService {
 
     public boolean salvarAluno(Aluno aluno) throws DAOException {
         if (aluno.getId() > 0) {
-            return alunoDao.update(aluno) > 0;
+            // Edição: atualiza aluno E a matrícula (caso o curso tenha mudado)
+            boolean alunoAtualizado = alunoDao.update(aluno) > 0;
+            if (alunoAtualizado) {
+                try {
+                    // Atualiza a matrícula com o novo curso
+                    Matricula m = new Matricula();
+                    m.setIdAluno(aluno.getId());
+                    m.setIdCurso(aluno.getIdCurso());
+                    // Buscar a matrícula existente e atualizar
+                    java.util.List<Matricula> matriculas = matriculaDao.findAll();
+                    for (Matricula mat : matriculas) {
+                        if (mat.getIdAluno() == aluno.getId()) {
+                            mat.setIdCurso(aluno.getIdCurso());
+                            matriculaDao.update(mat);
+                            break;
+                        }
+                    }
+                } catch (DAOException e) {
+                    System.err.println("Erro ao atualizar matrícula: " + e.getMessage());
+                }
+            }
+            return alunoAtualizado;
         } else {
+            // Novo cadastro: salva aluno e cria matrícula
             boolean salvo = alunoDao.save(aluno) > 0;
             if (salvo) {
                 try {

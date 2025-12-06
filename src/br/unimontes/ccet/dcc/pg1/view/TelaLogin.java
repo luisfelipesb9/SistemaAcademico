@@ -117,12 +117,16 @@ public class TelaLogin extends javax.swing.JFrame {
         String usuario = tfUsuario.getRealText();
         String senha = pfSenha.getRealPassword();
 
-        if (usuario.equals("admin") && senha.equals("123")) {
+        // Controller faz a validação - View apenas exibe resultado
+        br.unimontes.ccet.dcc.pg1.controller.LoginController loginController = new br.unimontes.ccet.dcc.pg1.controller.LoginController();
+        br.unimontes.ccet.dcc.pg1.controller.Response resultado = loginController.autenticar(usuario, senha);
+
+        if (resultado.isSucesso()) {
             TelaPrincipal principal = new TelaPrincipal();
             principal.setVisible(true);
             this.dispose();
         } else {
-            JOptionPane.showMessageDialog(this, "Usuário ou senha inválidos!", "Erro", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, resultado.getMensagem(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
 

@@ -170,7 +170,7 @@ public class TelaCadastroCurso extends javax.swing.JFrame {
 
         /**
          * Processa cadastro/edição de curso.
-         * View apenas exibe mensagens - validações e lógica estão no Controller.
+         * View apenas envia dados - Controller cria entidade e salva.
          */
         private void jbCadastrarActionPerformed(java.awt.event.ActionEvent evt) {
                 String nome = tfNome.getText();
@@ -186,31 +186,21 @@ public class TelaCadastroCurso extends javax.swing.JFrame {
                         return;
                 }
 
-                int creditosInt = Integer.parseInt(creditos);
-                Curso curso;
-                if (cursoEdicao != null) {
-                        curso = new Curso(cursoEdicao.getId(), nome, creditosInt);
-                } else {
-                        curso = new Curso(nome, creditosInt);
-                }
-
-                // Controller retorna Response
-                br.unimontes.ccet.dcc.pg1.controller.Response resultado = cursoController.salvar(curso);
+                // Controller cria a entidade e salva - View não toca em entidades
+                int idEdicao = cursoEdicao != null ? cursoEdicao.getId() : 0;
+                br.unimontes.ccet.dcc.pg1.controller.Response resultado = cursoController.criarESalvarCurso(nome,
+                                creditos, idEdicao);
 
                 if (resultado.isSucesso()) {
                         // Pegar o curso salvo do Response para ter o ID correto
                         Curso cursoSalvo = resultado.getDadosAs(Curso.class);
+                        int cursoId = cursoSalvo != null ? cursoSalvo.getId() : idEdicao;
 
                         // Salvar coordenador se informado
                         if (!nomeCoordenador.isEmpty()) {
                                 Professor p;
-                                if (coordenadorEdicao != null) {
-                                        p = new Professor(coordenadorEdicao.getId(), nomeCoordenador, titulacao,
-                                                        cursoSalvo != null ? cursoSalvo.getId() : curso.getId());
-                                } else {
-                                        p = new Professor(0, nomeCoordenador, titulacao,
-                                                        cursoSalvo != null ? cursoSalvo.getId() : curso.getId());
-                                }
+                                int coordId = coordenadorEdicao != null ? coordenadorEdicao.getId() : 0;
+                                p = new Professor(coordId, nomeCoordenador, titulacao, cursoId);
                                 cursoController.salvarCoordenador(p);
                         }
 

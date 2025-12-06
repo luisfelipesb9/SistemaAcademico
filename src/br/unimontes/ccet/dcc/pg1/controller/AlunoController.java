@@ -193,4 +193,36 @@ public class AlunoController implements IAlunoController {
 
         return Response.sucesso("Dados válidos.");
     }
+
+    /**
+     * Cria e salva um aluno.
+     * View envia dados brutos, Controller cria a entidade e salva.
+     * Move a criação de entidade da View para o Controller.
+     */
+    public Response criarESalvarAluno(String nome, String cpf, String anoNascimento, int cursoId, int idEdicao) {
+        try {
+            int ano = Integer.parseInt(anoNascimento);
+            Aluno aluno;
+            boolean isEdicao = idEdicao > 0;
+
+            if (isEdicao) {
+                aluno = new Aluno(idEdicao, cpf, nome, ano, cursoId);
+            } else {
+                aluno = new Aluno(cpf, nome, ano, cursoId);
+            }
+
+            if (alunoService == null)
+                return Response.erro("Serviço não disponível.");
+
+            boolean sucesso = alunoService.salvarAluno(aluno);
+            if (sucesso) {
+                String msg = isEdicao ? "Aluno editado com sucesso!" : "Aluno cadastrado com sucesso!";
+                return Response.sucesso(msg);
+            } else {
+                return Response.erro("Erro ao salvar aluno.");
+            }
+        } catch (DAOException e) {
+            return Response.erro("Erro: " + e.getMessage());
+        }
+    }
 }

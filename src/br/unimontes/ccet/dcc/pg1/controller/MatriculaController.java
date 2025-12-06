@@ -1,23 +1,31 @@
 package br.unimontes.ccet.dcc.pg1.controller;
 
-import br.unimontes.ccet.dcc.pg1.model.dao.AlunoDao;
-import br.unimontes.ccet.dcc.pg1.model.dao.MatriculaDao;
+import br.unimontes.ccet.dcc.pg1.model.service.MatriculaService;
+import br.unimontes.ccet.dcc.pg1.model.service.AlunoService;
+import br.unimontes.ccet.dcc.pg1.model.service.CursoService;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Aluno;
+import br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Matricula;
 import br.unimontes.ccet.dcc.pg1.model.dao.exception.DAOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
 
+/**
+ * Controller para operações de Matrícula.
+ * Usa Services para lógica de negócio (não acessa DAOs diretamente).
+ */
 public class MatriculaController {
 
-    private MatriculaDao dao;
-    private AlunoDao alunoDao;
+    private MatriculaService matriculaService;
+    private AlunoService alunoService;
+    private CursoService cursoService;
 
     public MatriculaController() {
         try {
-            dao = new MatriculaDao();
-            alunoDao = new AlunoDao();
+            matriculaService = new MatriculaService();
+            alunoService = new AlunoService();
+            cursoService = new CursoService();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -25,9 +33,9 @@ public class MatriculaController {
 
     public List<Matricula> listarTodas() {
         try {
-            if (dao == null)
+            if (matriculaService == null)
                 return new ArrayList<>();
-            return dao.findAll();
+            return matriculaService.listarTodos();
         } catch (DAOException e) {
             e.printStackTrace();
             return new ArrayList<>();
@@ -36,11 +44,9 @@ public class MatriculaController {
 
     public Matricula buscarPorId(int id) {
         try {
-            if (dao == null)
+            if (matriculaService == null)
                 return null;
-            Matricula m = new Matricula();
-            m.setId(id);
-            return dao.findOne(m);
+            return matriculaService.buscarPorId(id);
         } catch (DAOException e) {
             e.printStackTrace();
             return null;
@@ -49,22 +55,16 @@ public class MatriculaController {
 
     public boolean salvar(Matricula matricula) {
         try {
-            if (dao == null)
+            if (matriculaService == null)
                 return false;
-            if (matricula.getId() > 0 && buscarPorId(matricula.getId()) != null) {
-                return dao.update(matricula) > 0;
-            } else {
-                return dao.save(matricula) > 0;
-            }
+            return matriculaService.salvarMatricula(matricula);
         } catch (DAOException e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    public boolean excluir(int id) {
-        // Legacy method, kept for compatibility but might be incorrect if id is treated
-        // as internal ID
+    public Response excluir(int id) {
         return excluirPorAluno(id);
     }
 
@@ -72,34 +72,31 @@ public class MatriculaController {
      * Exclui a matrícula e o aluno associado.
      * Regra de negócio: aluno só existe com matrícula ativa.
      */
-    public boolean excluirPorAluno(int idAluno) {
+    public Response excluirPorAluno(int idAluno) {
         try {
-            if (dao == null || alunoDao == null)
-                return false;
+            if (matriculaService == null || alunoService == null)
+                return Response.erro("Serviço não disponível.");
 
-            // Primeiro exclui a matrícula
-            Matricula m = new Matricula();
-            m.setIdAluno(idAluno);
-            boolean matriculaExcluida = dao.delete(m) > 0;
+            // Primeiro exclui a matrícula via service
+            boolean matriculaExcluida = matriculaService.excluir(idAluno);
 
-            // Depois exclui o aluno (regra: aluno só existe com matrícula ativa)
+            // Depois exclui o aluno
             if (matriculaExcluida) {
-                Aluno a = new Aluno(idAluno, "000.000.000-00", "Dummy", 2000, 0);
-                alunoDao.delete(a);
+                alunoService.excluir(idAluno);
+                return Response.sucesso("Matrícula e aluno excluídos com sucesso!");
+            } else {
+                return Response.erro("Erro ao excluir matrícula.");
             }
-
-            return matriculaExcluida;
         } catch (DAOException e) {
-            e.printStackTrace();
-            return false;
+            return Response.erro("Erro: " + e.getMessage());
         }
     }
 
     public int count() {
         try {
-            if (dao == null)
+            if (matriculaService == null)
                 return 0;
-            return dao.count();
+            return matriculaService.count();
         } catch (SQLException e) {
             e.printStackTrace();
             return 0;
@@ -108,26 +105,24 @@ public class MatriculaController {
 
     /**
      * Lista todas as matrículas com dados formatados para a tabela.
-     * Inclui nome do aluno e nome do curso.
+     * Usa Services para buscar dados (não acessa DAOs).
      */
     public List<Object[]> listarMatriculasParaTabela(String termoPesquisa) {
-        List<Object[]> resultado = new java.util.ArrayList<>();
+        List<Object[]> resultado = new ArrayList<>();
         try {
-            if (dao == null)
+            if (matriculaService == null)
                 return resultado;
 
-            List<Matricula> matriculas = dao.findAll();
-            br.unimontes.ccet.dcc.pg1.controller.CursoController cursoController = new br.unimontes.ccet.dcc.pg1.controller.CursoController();
+            List<Matricula> matriculas = matriculaService.listarTodos();
 
             for (Matricula m : matriculas) {
                 String nomeAluno = "N/A";
                 String nomeCurso = "N/A";
                 try {
-                    Aluno a = alunoDao.findOne(new Aluno(m.getIdAluno(), "000.000.000-00", "Dummy", 2000, 0));
+                    Aluno a = alunoService.buscarPorId(m.getIdAluno());
                     if (a != null) {
                         nomeAluno = a.getNome();
-                        br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso c = cursoController
-                                .buscarPorId(m.getIdCurso());
+                        Curso c = cursoService.buscarPorId(m.getIdCurso());
                         if (c != null) {
                             nomeCurso = c.getNome();
                         }

@@ -1,7 +1,7 @@
 package br.unimontes.ccet.dcc.pg1.controller;
 
 import br.unimontes.ccet.dcc.pg1.model.service.CursoService;
-import br.unimontes.ccet.dcc.pg1.model.dao.ProfessorDao;
+import br.unimontes.ccet.dcc.pg1.model.service.ProfessorService;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Professor;
 import br.unimontes.ccet.dcc.pg1.model.dao.exception.DAOException;
@@ -13,17 +13,17 @@ import java.util.ArrayList;
 /**
  * Controller para operações de Curso.
  * Implementa ICursoController para garantir contrato com as Views.
- * Gerencia também operações de Professor/Coordenador.
+ * Gerencia também operações de Professor/Coordenador via ProfessorService.
  */
 public class CursoController implements ICursoController {
 
     private CursoService service;
-    private ProfessorDao professorDao;
+    private ProfessorService professorService;
 
     public CursoController() {
         try {
             service = new CursoService();
-            professorDao = new ProfessorDao();
+            professorService = new ProfessorService();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -111,9 +111,9 @@ public class CursoController implements ICursoController {
 
             for (Curso c : cursos) {
                 String nomeCoordenador = "Não definido";
-                if (professorDao != null) {
+                if (professorService != null) {
                     try {
-                        Professor coord = professorDao.buscarCoordenadorPorCurso(c.getId());
+                        Professor coord = professorService.buscarCoordenadorPorCurso(c.getId());
                         if (coord != null) {
                             nomeCoordenador = coord.getNomeFormatado();
                         }
@@ -142,10 +142,10 @@ public class CursoController implements ICursoController {
 
     @Override
     public Professor buscarCoordenadorPorCurso(int idCurso) {
-        if (professorDao == null)
+        if (professorService == null)
             return null;
         try {
-            return professorDao.buscarCoordenadorPorCurso(idCurso);
+            return professorService.buscarCoordenadorPorCurso(idCurso);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -154,17 +154,11 @@ public class CursoController implements ICursoController {
 
     @Override
     public Response salvarCoordenador(Professor professor) {
-        if (professorDao == null)
+        if (professorService == null)
             return Response.erro("Serviço de Professor não disponível.");
         try {
-            int result;
-            if (professor.getId() > 0) {
-                result = professorDao.update(professor);
-            } else {
-                result = professorDao.save(professor);
-            }
-
-            if (result > 0) {
+            boolean sucesso = professorService.salvar(professor);
+            if (sucesso) {
                 return Response.sucesso("Coordenador salvo com sucesso!");
             } else {
                 return Response.erro("Erro ao salvar coordenador.");
@@ -190,5 +184,36 @@ public class CursoController implements ICursoController {
         }
 
         return Response.sucesso("Dados válidos.");
+    }
+
+    /**
+     * Cria e salva um curso.
+     * View envia dados brutos, Controller cria a entidade e salva.
+     */
+    public Response criarESalvarCurso(String nome, String creditos, int idEdicao) {
+        try {
+            int creditosInt = Integer.parseInt(creditos);
+            boolean isEdicao = idEdicao > 0;
+            Curso curso;
+
+            if (isEdicao) {
+                curso = new Curso(idEdicao, nome, creditosInt);
+            } else {
+                curso = new Curso(nome, creditosInt);
+            }
+
+            if (service == null)
+                return Response.erro("Serviço não disponível.");
+
+            boolean sucesso = service.salvarCurso(curso);
+            if (sucesso) {
+                String msg = isEdicao ? "Curso editado com sucesso!" : "Curso cadastrado com sucesso!";
+                return Response.sucesso(msg, curso);
+            } else {
+                return Response.erro("Erro ao salvar curso.");
+            }
+        } catch (DAOException e) {
+            return Response.erro("Erro: " + e.getMessage());
+        }
     }
 }

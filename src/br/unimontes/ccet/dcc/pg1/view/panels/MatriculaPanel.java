@@ -222,11 +222,12 @@ public class MatriculaPanel extends javax.swing.JPanel {
                 "Confirmar Exclusão", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            if (matriculaController.excluirPorAluno(idAluno)) {
+            // Controller retorna Response - View decide como exibir
+            br.unimontes.ccet.dcc.pg1.controller.Response resultado = matriculaController.excluirPorAluno(idAluno);
+            JOptionPane.showMessageDialog(this, resultado.getMensagem());
+
+            if (resultado.isSucesso()) {
                 listarMatriculas();
-                JOptionPane.showMessageDialog(this, "Matrícula e aluno excluídos com sucesso!");
-            } else {
-                JOptionPane.showMessageDialog(this, "Erro ao excluir matrícula.");
             }
         }
     }
