@@ -17,7 +17,8 @@ public class TelaDashboard extends javax.swing.JFrame {
 
         /**
          * Atualiza os componentes visuais com dados do controller.
-         * View apenas exibe dados - toda lógica está no Controller.
+         * View apenas exibe dados - toda lógica e cálculos estão no Controller.
+         * Os valores das progress bars já vêm calculados pelo Controller.
          */
         private void atualizarDados() {
                 try {

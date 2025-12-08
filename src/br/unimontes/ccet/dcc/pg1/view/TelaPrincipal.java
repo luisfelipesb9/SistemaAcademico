@@ -8,6 +8,11 @@ public class TelaPrincipal extends javax.swing.JFrame {
         refreshDashboard();
     }
 
+    /**
+     * Atualiza os contadores do mini-dashboard na tela principal.
+     * View apenas formata e exibe dados.
+     * Os dados vêm do Controller - View não faz cálculos nem acessa DAO.
+     */
     public void refreshDashboard() {
         try {
             br.unimontes.ccet.dcc.pg1.controller.DashboardController controller = new br.unimontes.ccet.dcc.pg1.controller.DashboardController();

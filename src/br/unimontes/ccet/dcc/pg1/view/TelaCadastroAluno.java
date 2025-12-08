@@ -21,7 +21,8 @@ public class TelaCadastroAluno extends javax.swing.JFrame {
 
         /**
          * Carrega os cursos no combo usando o controller.
-         * View apenas popula o combo - lógica de busca está no controller.
+         * View apenas popula o combo (operação visual).
+         * A busca dos dados é feita pelo Controller - View não acessa DAO.
          */
         private void carregarCursosNoCombo() {
                 try {
@@ -37,7 +38,8 @@ public class TelaCadastroAluno extends javax.swing.JFrame {
 
         /**
          * Preenche o formulário com dados do aluno para edição.
-         * Controller determina o índice do curso no combo.
+         * View apenas preenche campos visuais.
+         * Controller calcula o índice do curso no combo.
          */
         public void setAluno(Aluno aluno) {
                 this.idAluno = aluno.getId();

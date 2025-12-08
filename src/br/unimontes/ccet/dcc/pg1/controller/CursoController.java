@@ -216,4 +216,18 @@ public class CursoController implements ICursoController {
             return Response.erro("Erro: " + e.getMessage());
         }
     }
+
+    /**
+     * Cria e salva um coordenador.
+     * View envia dados brutos, Controller cria a entidade Professor e salva.
+     * Move a criação de entidade da View para o Controller.
+     */
+    public Response criarESalvarCoordenador(String nome, String titulacao, int idCurso, int idCoordenador) {
+        if (nome == null || nome.trim().isEmpty()) {
+            return Response.sucesso("Coordenador não informado.");
+        }
+
+        Professor professor = new Professor(idCoordenador, nome, titulacao, idCurso);
+        return salvarCoordenador(professor);
+    }
 }

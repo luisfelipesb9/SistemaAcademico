@@ -7,6 +7,7 @@ import br.unimontes.ccet.dcc.pg1.model.dao.entity.Aluno;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Curso;
 import br.unimontes.ccet.dcc.pg1.model.dao.entity.Matricula;
 import br.unimontes.ccet.dcc.pg1.model.dao.exception.DAOException;
+import br.unimontes.ccet.dcc.pg1.view.interfaces.IMatriculaController;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
@@ -14,8 +15,9 @@ import java.util.ArrayList;
 /**
  * Controller para operações de Matrícula.
  * Usa Services para lógica de negócio (não acessa DAOs diretamente).
+ * Implementa IMatriculaController para garantir contrato com as Views.
  */
-public class MatriculaController {
+public class MatriculaController implements IMatriculaController {
 
     private MatriculaService matriculaService;
     private AlunoService alunoService;
@@ -31,6 +33,7 @@ public class MatriculaController {
         }
     }
 
+    @Override
     public List<Matricula> listarTodas() {
         try {
             if (matriculaService == null)
@@ -42,6 +45,7 @@ public class MatriculaController {
         }
     }
 
+    @Override
     public Matricula buscarPorId(int id) {
         try {
             if (matriculaService == null)
@@ -53,6 +57,7 @@ public class MatriculaController {
         }
     }
 
+    @Override
     public boolean salvar(Matricula matricula) {
         try {
             if (matriculaService == null)
@@ -64,6 +69,7 @@ public class MatriculaController {
         }
     }
 
+    @Override
     public Response excluir(int id) {
         return excluirPorAluno(id);
     }
@@ -72,6 +78,7 @@ public class MatriculaController {
      * Exclui a matrícula e o aluno associado.
      * Regra de negócio: aluno só existe com matrícula ativa.
      */
+    @Override
     public Response excluirPorAluno(int idAluno) {
         try {
             if (matriculaService == null || alunoService == null)
@@ -92,6 +99,7 @@ public class MatriculaController {
         }
     }
 
+    @Override
     public int count() {
         try {
             if (matriculaService == null)
@@ -107,6 +115,7 @@ public class MatriculaController {
      * Lista todas as matrículas com dados formatados para a tabela.
      * Usa Services para buscar dados (não acessa DAOs).
      */
+    @Override
     public List<Object[]> listarMatriculasParaTabela(String termoPesquisa) {
         List<Object[]> resultado = new ArrayList<>();
         try {

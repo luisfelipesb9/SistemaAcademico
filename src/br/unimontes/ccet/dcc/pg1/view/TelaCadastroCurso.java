@@ -19,7 +19,8 @@ public class TelaCadastroCurso extends javax.swing.JFrame {
 
         /**
          * Preenche o formulário com dados do curso para edição.
-         * Controller busca o coordenador - View apenas exibe.
+         * View apenas preenche campos visuais.
+         * Controller busca o coordenador - View não acessa DAO.
          */
         public void setCurso(Curso curso) {
                 this.cursoEdicao = curso;
@@ -196,13 +197,9 @@ public class TelaCadastroCurso extends javax.swing.JFrame {
                         Curso cursoSalvo = resultado.getDadosAs(Curso.class);
                         int cursoId = cursoSalvo != null ? cursoSalvo.getId() : idEdicao;
 
-                        // Salvar coordenador se informado
-                        if (!nomeCoordenador.isEmpty()) {
-                                Professor p;
-                                int coordId = coordenadorEdicao != null ? coordenadorEdicao.getId() : 0;
-                                p = new Professor(coordId, nomeCoordenador, titulacao, cursoId);
-                                cursoController.salvarCoordenador(p);
-                        }
+                        // Salvar coordenador se informado - Controller cria a entidade
+                        int coordId = coordenadorEdicao != null ? coordenadorEdicao.getId() : 0;
+                        cursoController.criarESalvarCoordenador(nomeCoordenador, titulacao, cursoId, coordId);
 
                         JOptionPane.showMessageDialog(this, resultado.getMensagem());
                         dispose();

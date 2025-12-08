@@ -1,10 +1,12 @@
 package br.unimontes.ccet.dcc.pg1.controller;
 
+import br.unimontes.ccet.dcc.pg1.view.interfaces.IDashboardController;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DashboardController {
+public class DashboardController implements IDashboardController {
 
+    @Override
     public Map<String, Integer> getDadosDashboard() {
         Map<String, Integer> dados = new HashMap<>();
 
@@ -23,6 +25,7 @@ public class DashboardController {
      * Retorna dados completos para o dashboard, incluindo valores do progress bar.
      * Move a lógica de cálculo que antes estava na View.
      */
+    @Override
     public Map<String, Object> getDadosCompletoDashboard() {
         Map<String, Object> dados = new HashMap<>();
 
